@@ -2,10 +2,10 @@ import sys
 import pandas as pd
 import numpy as np
 
-global Y_pred
+dataX = pd.read_csv(str(sys.argv[1]) + "/X.csv",header=None)
+dataY = pd.read_csv(str(sys.argv[1]) + "/Y.csv",header=None)
 
-dataX = pd.read_csv(sys.argv[1],header=None)
-dataY = pd.read_csv(sys.argv[2],header=None)
+testdataX = pd.read_csv(str(sys.argv[2]) + "/X.csv", header = None)
 
 arrX = dataX.to_numpy()
 arrY = dataY.to_numpy()
@@ -53,7 +53,7 @@ def linear_regression(learning_rate):
 theta = linear_regression(eta)
 print(theta)
 Y_pred = np.matmul(arrX,theta)
-with open('result_1.txt', 'w') as f:
+with open(str(sys.argv[2]) + '/result_1.txt', 'w') as f:
     for y in Y_pred:
         f.write(str(y[0]))
         f.write('\n')
