@@ -6,19 +6,32 @@ import q1
 
 def get_3d_meshgrid(theta, margins):
     m0, m1 = margins
-    theta = theta.flatten()
-    #Adjust margins as per requirement.
-    theta0 = np.linspace(theta[0] - m0, theta[0] + m0, 100)
-    theta1 = np.linspace(theta[1] - m1, theta[1] + m1, 100)
-    X, Y = np.meshgrid(theta0, theta1)
-    Z = np.zeros((theta0.size,  theta1.size))
 
-    for i, w0 in enumerate(theta0):
-        for j, w1 in enumerate(theta1):
-            w = np.expand_dims([w0, w1], axis=0)
-            w_ = w.reshape(2,1)
-            Z[i, j]= q1.find_cost(q1.arrX, q1.arrY, w_)
+    #Adjust margins as per requirement.
+    theta0 = np.linspace(theta.T[0][0]- m0, theta.T[0][0] + m0, 100)
+    theta1 = np.linspace(theta.T[0][1] - m1, theta.T[0][1] + m1, 100)
+    X, Y = np.meshgrid(theta0, theta1)
+    Z = np.zeros((theta0.size,theta1.size))
+    for i,w0 in enumerate(theta0):
+        for j,w1 in enumerate(theta1):
+            W = np.array([w0,w1]).reshape((2,1))
+            Z[i,j] = q1.find_cost(q1.arrX,q1.arrY,W)
+    print(Z)
     return(X, Y, Z)
+    # m0, m1 = margins
+
+    # #Adjust margins as per requirement.
+    # theta0 = np.linspace(theta.T[0][0]- m0, theta[0] + m0, 100)
+    # theta1 = np.linspace(theta.T[0][1] - m1, theta[1] + m1, 100)
+    # X, Y = np.meshgrid(theta0, theta1)
+    # Z = q1.find_cost(q1.arrX,q1.arrY,theta)
+
+    # for i, w0 in enumerate(theta0):
+    #     for j, w1 in enumerate(theta1):
+    #         w = np.expand_dims([w0, w1], axis=0)
+    #         w_ = w.reshape(2,1)
+    #         Z[i, j]= q1.find_cost(q1.arrX, q1.arrY, w_)
+    # return(X, Y, Z)
 
 def plot_annotated_cost_surface(theta, logs, y_label, margins):
     X, Y, Z = get_3d_meshgrid(theta, margins)
@@ -36,14 +49,10 @@ def plot_annotated_cost_surface(theta, logs, y_label, margins):
     graph.set_ylabel('theta1')
     graph.set_zlabel('J(theta)')
             
-    #Annotate the surface thetaith learning curves
     for label, log in logs.items():
         theta_array = np.vstack(tuple(log["theta"]))
         print(theta_array)
-        if (len(logs) == 1):
-            graph.plot(theta_array[:, 0], theta_array[:, 1], log["train_loss"], "ro-", linewidth=3, label=f"{y_label} = {label}")
-        else:
-            graph.plot(theta_array[:, 0], theta_array[:, 1], log["train_loss"], "o-", linewidth=3, label=f"{y_label} = {label}")
+        graph.scatter(theta_array[:, 0], theta_array[:, 1], log["train_loss"])
     graph.legend()
     plt.show()
 

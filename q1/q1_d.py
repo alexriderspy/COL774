@@ -2,30 +2,27 @@ import q1_c
 import q1
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib import cm
 
-def plot_annotated_cost_contour(W, logs, y_label, margins):
+def plot_annotated_cost_contour(W, logs, margins):
     X, Y, Z = q1_c.get_3d_meshgrid(W, margins)
     
+    #Plot the 3D surface
     fig = plt.figure(figsize=(12,8))
     graph = plt.subplot()
-    
+        
     #Plot the 3D surface
-    graph.contourf(X, Y, Z, cmap=cm.winter)
+    graph.contourf(X, Y, Z)
     graph.set_xlim(X.min(), X.max())
     graph.set_ylim(Y.min(), Y.max())
-    graph.set_title('Loss Contour & Learning Curve')
-    graph.set_xlabel('W0')
-    graph.set_ylabel('W1')
-        
-    #Annotate the surface with learning curves
+    graph.set_title('Loss Surface & Learning Curve')
+    graph.set_xlabel('theta0')
+    graph.set_ylabel('theta1')
+            
     for label, log in logs.items():
-        W_array = np.vstack(tuple(log["theta"]))
-        if (len(logs) == 1):
-            graph.plot(W_array[:, 0], W_array[:, 1], "ro-", linewidth=3, label=f"{y_label} = {label}")
-        else:
-            graph.plot(W_array[:, 0], W_array[:, 1], "o-", linewidth=3, label=f"{y_label} = {label}")
+        theta_array = np.vstack(tuple(log["theta"]))
+        print(theta_array)
+        graph.scatter(theta_array[:, 0], theta_array[:, 1])
     graph.legend()
     plt.show()
-
-plot_annotated_cost_contour(q1.theta, q1_c.logs, "alpha", margins=(0.01, 10))
+        
+plot_annotated_cost_contour(q1.theta, q1_c.logs, margins=(1, 1))

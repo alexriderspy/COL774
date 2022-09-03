@@ -40,17 +40,18 @@ def linear_regression(learning_rate):
   theta = np.zeros(2).reshape((2,1))
   cost_delta = 1000
   cost = -1
-  while cost_delta > 0.0000001:
-    theta = theta + (learning_rate/m) * np.sum(np.multiply(arrX,arrY - np.matmul(arrX,theta)).T,axis=1).reshape((2,1))
+  while cost_delta > 1e-9:
+    theta = theta + (learning_rate/m) * np.sum((arrX * (arrY - np.matmul(arrX,theta))).T,axis=1).reshape((2,1))
     log["theta"].append(theta.flatten())
-    log["train_loss"].append(cost)
-
+  
     newcost = find_cost(arrX,arrY,theta)
+    log["train_loss"].append(newcost)
+
     cost_delta = abs(newcost - cost)
     cost = newcost
   return theta
 
-theta = linear_regression(eta)
+theta = linear_regression(0.025)
 print(theta)
 Y_pred = np.matmul(arrX,theta)
 with open(str(sys.argv[2]) + '/result_1.txt', 'w') as f:
