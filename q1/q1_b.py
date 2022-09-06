@@ -1,13 +1,10 @@
 import matplotlib.pyplot as plt
-import q1
+import q1_a
 
-arrX = q1.arrX.T[1]
-arrY = q1.arrY.T[0]
-
-print(arrX)
-print(arrY)
+arrX = q1_a.arrX.T[1]
+arrY = q1_a.arrY.T[0]
 
 plt.plot(arrX,arrY,'bo')
-plt.plot(arrX,q1.Y_pred.T[0])
+plt.plot(arrX,q1_a.Y_pred.T[0])
 
 plt.show()

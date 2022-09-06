@@ -14,13 +14,11 @@ arrX_Y_1 = arrX_Y[np.in1d(arrX_Y[:, 3], filter)]
 filter = np.asarray([0])
 arrX_Y_0 = arrX_Y[np.in1d(arrX_Y[:, 3], filter)]
 
-print(arrX_Y_1[:,1].T)
-print(arrX_Y_1[:,2].T)
-print(arrX_Y_0[:,1].T)
-print(arrX_Y_0[:,2].T)
-
 plt.plot(arrX_Y_1[:,1].T,arrX_Y_1[:,2].T,'bx')
 plt.plot(arrX_Y_0[:,1].T,arrX_Y_0[:,2].T,'rx')
+plt.xlabel("x1")
+plt.ylabel("x2")
+plt.legend(["1","0"])
 
 X = np.linspace(X1_min,X1_max,100)
 theta = q3.theta

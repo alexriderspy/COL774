@@ -26,8 +26,6 @@ arrX[:, [0,1]] = arrX[:,[1,0]]
 arrX.reshape((m,3))
 arrY.reshape((m,1))
 
-print(arrX)
-
 def find_ll(arrX,arrY,theta):
   ll_fn = np.sum(arrY * (np.log(1/(1+np.exp(-np.matmul(arrX,theta))))) + (1-arrY) * (np.log(1-1/(1+np.exp(-np.matmul(arrX,theta))))))
   return ll_fn
@@ -62,7 +60,6 @@ theta = newton()
 print(theta)
 
 Y_pred = 1/(1+np.exp(-np.matmul(arrX,theta)))
-print(Y_pred)
 
 def f(x):
     if x > 0.5:
@@ -72,9 +69,7 @@ def f(x):
 
 f_v = np.vectorize(f)
 Y_f = f_v(Y_pred)
-print(Y_f)
 
-print(find_cost(Y_f,arrY))
 with open(str(sys.argv[2]) + '/result_3.txt', 'w') as f:
     for y in Y_f:
         f.write(str(y[0]))

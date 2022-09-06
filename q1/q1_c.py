@@ -2,12 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
-import q1
+import q1_a
 
 def get_3d_meshgrid(theta, margins):
     m0, m1 = margins
 
-    #Adjust margins as per requirement.
     theta0 = np.linspace(theta.T[0][0]- m0, theta.T[0][0] + m0, 100)
     theta1 = np.linspace(theta.T[0][1] - m1, theta.T[0][1] + m1, 100)
     X, Y = np.meshgrid(theta0, theta1)
@@ -15,31 +14,15 @@ def get_3d_meshgrid(theta, margins):
     for i,w0 in enumerate(theta0):
         for j,w1 in enumerate(theta1):
             W = np.array([w0,w1]).reshape((2,1))
-            Z[i,j] = q1.find_cost(q1.arrX,q1.arrY,W)
-    print(Z)
+            Z[i,j] = q1_a.find_cost(q1_a.arrX,q1_a.arrY,W)
     return(X, Y, Z)
-    # m0, m1 = margins
 
-    # #Adjust margins as per requirement.
-    # theta0 = np.linspace(theta.T[0][0]- m0, theta[0] + m0, 100)
-    # theta1 = np.linspace(theta.T[0][1] - m1, theta[1] + m1, 100)
-    # X, Y = np.meshgrid(theta0, theta1)
-    # Z = q1.find_cost(q1.arrX,q1.arrY,theta)
-
-    # for i, w0 in enumerate(theta0):
-    #     for j, w1 in enumerate(theta1):
-    #         w = np.expand_dims([w0, w1], axis=0)
-    #         w_ = w.reshape(2,1)
-    #         Z[i, j]= q1.find_cost(q1.arrX, q1.arrY, w_)
-    # return(X, Y, Z)
-
-def plot_annotated_cost_surface(theta, logs, y_label, margins):
+def plot_annotated_cost_surface(theta, logs, margins):
     X, Y, Z = get_3d_meshgrid(theta, margins)
     
     fig = plt.figure(figsize=(12,8))
     graph = plt.subplot(projection='3d')
-        
-    #Plot the 3D surface
+
     graph.plot_surface(X, Y, Z, cmap=cm.winter)
     graph.set_xlim(X.min(), X.max())
     graph.set_ylim(Y.min(), Y.max())
@@ -49,12 +32,10 @@ def plot_annotated_cost_surface(theta, logs, y_label, margins):
     graph.set_ylabel('theta1')
     graph.set_zlabel('J(theta)')
             
-    for label, log in logs.items():
+    for _, log in logs.items():
         theta_array = np.vstack(tuple(log["theta"]))
-        print(theta_array)
         graph.scatter(theta_array[:, 0], theta_array[:, 1], log["train_loss"])
-    graph.legend()
     plt.show()
 
-logs = {q1.log["alpha"]: q1.log}
-plot_annotated_cost_surface(q1.theta, logs, "alpha", margins=(0.01, 0.001))
+logs = {q1_a.log["alpha"]: q1_a.log}
+plot_annotated_cost_surface(q1_a.theta, logs, margins=(0.01, 0.001))

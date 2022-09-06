@@ -15,4 +15,3 @@ arrX = np.append(arrX,x1.reshape((m,1)),axis=1)
 
 theta = np.array([3, 1, 2]).reshape((3,1))
 arrY = np.matmul(arrX, theta) + e.reshape((m,1))
-print(arrY)
