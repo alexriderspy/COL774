@@ -29,12 +29,8 @@ std_testX = np.std(testX,axis=0)
 testX = (testX - meanX)/stdX
 
 testm = testX.shape[0]
-z = np.ones((testm,1))
-testX = np.append(testX,z,axis=1)
-testX[:, [1,2]] = testX[:,[2,1]]
-testX[:, [0,1]] = testX[:,[1,0]]
 
-testX.reshape((testm,3))
+testX.reshape((testm,2))
 
 m = arrX.shape[0]
 n = arrX.shape[1]
@@ -69,6 +65,22 @@ mu02 = mu0[1][0]
 mu11 = mu1[0][0]
 mu12 = mu1[1][0]
 
+sigma1 = (1/np.sum(arrY)) * np.matmul((arrY*((arrX.T - mu1).reshape((m,2)))).T,(arrY*((arrX.T - mu1).reshape((m,2))))).reshape((2,2))
+sigma0 = (1/np.sum(1-arrY)) * np.matmul(((1-arrY)*((arrX.T - mu0).reshape((m,2)))).T,((1-arrY)*((arrX.T - mu0).reshape((m,2))))).reshape((2,2))
+
+inv_sigma0 = np.linalg.pinv(sigma0)
+inv_sigma1 = np.linalg.pinv(sigma1)
+
+a1=inv_sigma0[0][0]
+b1=inv_sigma0[0][1]
+c1=inv_sigma0[1][0]
+d1=inv_sigma0[1][1]
+
+a2=inv_sigma1[0][0]
+b2=inv_sigma1[0][1]
+c2=inv_sigma1[1][0]
+d2=inv_sigma1[1][1]
+
 intercept = 2*np.log((1-phi)/phi) + a*(mu01 + mu11)*(mu11-mu01) + d*(mu02+mu12)*(mu12-mu02) - (b+c)*(mu01*mu02 - mu11*mu12)
 
 X1_min = -0.5
@@ -85,20 +97,15 @@ theta2 = 2*d - mu01*(b+c) + mu11*(b+c)
 X = np.linspace(X1_min,X1_max,10)
 Y = (-theta0 - X*(theta1))/(theta2)
 
-theta = np.array([theta0,theta1,theta2]).reshape((3,1))
-
-Y_pred = 1/(1+np.exp(-np.matmul(testX,theta)))
-
-def f(x):
-    if x > 0.5:
+def func(x1,x2):
+    z = a1*(x1*x1+mu01*mu01-2*x1*mu01) + (b1+c1)*(x2*x1 - mu02*x1-mu01*x2+mu01*mu02) + d1*(x2*x2 + mu02*mu02-2*x2*mu02)-((2*np.log((1-phi)/phi))+a2*(x1*x1+mu11*mu11-2*x1*mu11) + (b2+c2)*(x1*x2-x1*mu12-x2*mu11+mu11*mu12) + d2*(x2*x2+mu12*mu12-2*x2*mu12))
+    if z > 0:
         return "Canada"
     else:
         return "Alaska"
 
-f_v = np.vectorize(f)
-Y_f = f_v(Y_pred)
-
 with open('./result_4.txt', 'w') as f:
-    for y in Y_f:
-        f.write(str(y[0]))
+    for x in testX:
+        y = func(x[0],x[1])
+        f.write(str(y))
         f.write('\n')

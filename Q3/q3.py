@@ -62,7 +62,7 @@ def grad(theta):
 def newton():
     theta = np.zeros(3).reshape((3,1))
     theta_delta = 1000
-    while theta_delta > 1e-9:
+    while theta_delta > 1e-19:
         newtheta = theta - np.matmul(inv_hessian(theta),grad(theta))  
         theta_delta = np.sum((newtheta - theta)**2)
         theta = newtheta
