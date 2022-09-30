@@ -1,8 +1,13 @@
 from math import log
-import random
 import sys
+import numpy as np
+import pandas as pd
+from PIL import Image
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud,STOPWORDS
+from nltk.stem import SnowballStemmer
+
 from os import walk
-from tabulate import tabulate
 
 #positive data
 
@@ -50,10 +55,17 @@ for (dirpath, dirnames, filenames) in walk(test_path + '/neg'):
 pos_prob = cnt_pos/(cnt_pos+cnt_neg)
 neg_prob = cnt_neg/(cnt_pos+cnt_neg)
 
+snowball = SnowballStemmer(language='english')
+stopwords = STOPWORDS
+stopwords.add('br')
+
 for file in my_files_pos:
     txt = open(file,'r').read()
     words = txt.split()
     for w in words:
+        w = snowball.stem(w)
+        if w in stopwords:
+            continue
         if cnt_pos_lis.get(w) == None:
             cnt_pos_lis[w]=1
         else:
@@ -70,7 +82,12 @@ for file in my_files_pos:
 for file in my_files_neg:
     txt = open(file,'r').read()
     words = txt.split()
+    
     for w in words:
+        w = snowball.stem(w)
+        if w in stopwords:
+            continue
+
         if cnt_neg_lis.get(w) == None:
             cnt_neg_lis[w]=1
         else:
@@ -96,6 +113,38 @@ for item0 in cnt_neg_lis:
     for c in str(cnt_neg_lis[item0]):
         output_neg += item0 + ' '
 
+wc_pos = WordCloud(
+    background_color='white',
+    max_words=2000,
+    stopwords=stopwords
+)
+
+wc_pos.generate(output_pos)
+
+fig = plt.figure()
+fig.set_figwidth(14) 
+fig.set_figheight(18)
+
+plt.imshow(wc_pos, interpolation='bilinear')
+plt.axis('off')
+fig.savefig('pos_wc.png')
+
+wc_neg = WordCloud(
+    background_color='white',
+    max_words=2000,
+    stopwords=stopwords
+)
+
+wc_neg.generate(output_neg)
+
+fig = plt.figure()
+fig.set_figwidth(14) 
+fig.set_figheight(18)
+
+plt.imshow(wc_neg, interpolation='bilinear')
+plt.axis('off')
+fig.savefig('neg_wc.png')
+
 #accuracy for a .txt file
 
 #accuracy for train data
@@ -108,10 +157,15 @@ def calc_accu(files,type):
 
         test_file = open(file,'r').read()
         words = test_file.split()
+
         log_p_pos = 0
         log_p_neg = 0
 
         for w in words:
+            w=snowball.stem(w)
+            if w in stopwords:
+                continue
+
             if cnt_pos_lis.get(w) == None:
                 log_p_pos += log((1)/(cnt_wrds_pos + len(cnt_lis)))
             else:
@@ -129,47 +183,17 @@ def calc_accu(files,type):
             accu += 1
     return accu
 
-#accuracy of test data
+accu += calc_accu(my_files_pos,'pos') + calc_accu(my_files_neg,'neg')
 
-pos_accu = calc_accu(test_pos,'pos')
-neg_accu = calc_accu(test_neg,'neg')
-
-tp = pos_accu
-tn = neg_accu
-fp = len(test_neg)-neg_accu
-fn = len(test_pos)-pos_accu
-
-table = [["Positive (predicted)", tp,fp],["Negative (predicted)",fn,tn]]
-print("Confusion matrix for Naive Bayes model")
-print(tabulate(table, headers=["Positive(actual)","Negative(actual)"]))
-
-def calc_accu_rand(files,type):
-    accu = 0
-    for file in files:
-        num = random.randint(0,1)
-        if (num == 0 and type == 'neg') or (num == 1 and type == 'pos'):
-            accu+=1
-    return accu
+accu = accu / (len(my_files_pos)+len(my_files_neg))
+print("Accuracy of train data : "+ str(accu))
 
 #accuracy of test data
 
-pos_accu = calc_accu_rand(test_pos,'pos')
-neg_accu = calc_accu_rand(test_neg,'neg')
+accu = 0
 
-tp = pos_accu
-tn = neg_accu
-fp = len(test_neg)-neg_accu
-fn = len(test_pos)-pos_accu
+accu += calc_accu(test_pos,'pos') + calc_accu(test_neg,'neg')
 
-table = [["Positive (predicted)", tp,fp],["Negative (predicted)",fn,tn]]
-print("Confusion matrix for random model")
-print(tabulate(table, headers=["Positive(actual)","Negative(actual)"]))
+accu = accu / (len(test_pos)+len(test_neg))
+print("Accuracy of test data : "+ str(accu))
 
-tp = len(test_pos)
-tn = 0
-fp = len(test_neg)
-fn = 0
-
-table = [["Positive (predicted)", tp,fp],["Negative (predicted)",fn,tn]]
-print("Confusion matrix for all positive model")
-print(tabulate(table, headers=["Positive(actual)","Negative(actual)"]))

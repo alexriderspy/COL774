@@ -6,6 +6,7 @@ from PIL import Image
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 
+
 from os import walk
 
 #positive data
