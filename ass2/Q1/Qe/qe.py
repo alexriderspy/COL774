@@ -1,10 +1,6 @@
 from math import log
 import sys
-import numpy as np
-import pandas as pd
-from PIL import Image
-import matplotlib.pyplot as plt
-from wordcloud import WordCloud,STOPWORDS
+from wordcloud import STOPWORDS
 from nltk.stem import SnowballStemmer
 
 from os import walk
@@ -28,6 +24,9 @@ cnt_lis = {}
 cnt2_pos_lis = {}
 cnt2_neg_lis = {}
 cnt2_lis = {}
+cnt3_pos_lis = {}
+cnt3_neg_lis = {}
+cnt3_lis = {}
 
 cnt_wrds_pos = 0
 cnt_wrds_neg = 0
@@ -35,6 +34,9 @@ cnt_wrds = 0
 cnt2_wrds_pos = 0
 cnt2_wrds_neg = 0
 cnt2_wrds = 0
+cnt3_wrds_pos = 0
+cnt3_wrds_neg = 0
+cnt3_wrds = 0
 
 for (dirpath, dirnames, filenames) in walk(train_path + '/pos'):
     for filename in filenames:
@@ -111,6 +113,24 @@ for file in my_files_pos:
         else:
             cnt2_lis[(w0,w1)] = cnt2_lis[(w0,w1)]+1
 
+    for i in range(len(new_words)-2):
+        w0 = new_words[i]
+        w1 = new_words[i+1]
+        w2 = new_words[i+2]
+
+        if cnt3_pos_lis.get((w0,w1,w2))== None:
+            cnt3_pos_lis[(w0,w1,w2)]=1
+        else:
+            cnt3_pos_lis[(w0,w1,w2)] = cnt3_pos_lis[(w0,w1,w2)]+1
+        
+        cnt3_wrds_pos += 1
+        cnt3_wrds += 1
+
+        if cnt3_lis.get((w0,w1,w2)) == None:
+            cnt3_lis[(w0,w1,w2)]=1
+        else:
+            cnt3_lis[(w0,w1,w2)] = cnt3_lis[(w0,w1,w2)]+1
+
 for file in my_files_neg:
     txt = open(file,'r').read()
     words = txt.split()
@@ -150,12 +170,30 @@ for file in my_files_neg:
         else:
             cnt2_lis[(w0,w1)] = cnt2_lis[(w0,w1)]+1
 
+    for i in range(len(new_words)-2):
+        w0 = new_words[i]
+        w1 = new_words[i+1]
+        w2 = new_words[i+2]
+
+        if cnt3_neg_lis.get((w0,w1,w2))== None:
+            cnt3_neg_lis[(w0,w1,w2)]=1
+        else:
+            cnt3_neg_lis[(w0,w1,w2)] = cnt3_neg_lis[(w0,w1,w2)]+1
+        
+        cnt3_wrds_neg += 1
+        cnt3_wrds += 1
+
+        if cnt3_lis.get((w0,w1,w2)) == None:
+            cnt3_lis[(w0,w1,w2)]=1
+        else:
+            cnt3_lis[(w0,w1,w2)] = cnt3_lis[(w0,w1,w2)]+1
+
 #accuracy for train data
 
 accu = 0
 
-def calc_accu(files,type):
-    global cnt_pos_lis,cnt_wrds_neg,cnt_wrds_pos,cnt_pos_lis,cnt_wrds,cnt_lis,cnt_neg_lis,cnt2_wrds_pos,cnt2_wrds_neg,cnt2_pos_lis,cnt2_neg_lis,cnt2_lis,cnt2_wrds,pos_prob,neg_prob
+def calc_accu(files,type,part='a'):
+    global cnt_pos_lis,cnt_wrds_neg,cnt_wrds_pos,cnt_pos_lis,cnt_wrds,cnt_lis,cnt_neg_lis,cnt2_wrds_pos,cnt2_wrds_neg,cnt2_pos_lis,cnt2_neg_lis,cnt2_lis,cnt2_wrds,cnt3_wrds_pos,cnt3_wrds_neg,cnt3_pos_lis,cnt3_neg_lis,cnt3_lis,cnt3_wrds,pos_prob,neg_prob
 
     accu = 0
     for file in files:
@@ -197,6 +235,22 @@ def calc_accu(files,type):
             else:
                 log_p_neg += log((1+cnt2_neg_lis[(w0,w1)])/(cnt2_wrds_neg + len(cnt2_lis)))
 
+        if part == 'b':
+            for i in range(len(new_words)-2):
+                w0 = new_words[i]
+                w1 = new_words[i+1]
+                w2 = new_words[i+2]
+
+                if cnt3_pos_lis.get((w0,w1,w2))== None:
+                    log_p_pos += log((1)/(cnt3_wrds_pos + len(cnt3_lis)))
+                else:
+                    log_p_pos += log((1+cnt3_pos_lis[(w0,w1,w2)])/(cnt3_wrds_pos + len(cnt3_lis)))
+                
+                if cnt3_neg_lis.get((w0,w1,w2)) == None:
+                    log_p_neg += log((1)/(cnt3_wrds_neg + len(cnt3_lis)))
+                else:
+                    log_p_neg += log((1+cnt3_neg_lis[(w0,w1,w2)])/(cnt3_wrds_neg + len(cnt3_lis)))
+
         log_p_pos += log(pos_prob)
         log_p_neg += log(neg_prob)
 
@@ -204,16 +258,25 @@ def calc_accu(files,type):
             accu += 1
     return accu
 
-accu += calc_accu(my_files_pos,'pos') + calc_accu(my_files_neg,'neg')
 
-accu = accu / (len(my_files_pos)+len(my_files_neg))
-print("Accuracy of train data : "+ str(accu))
+print("Bigram model : ")
 
 #accuracy of test data
 
 accu = 0
 
 accu += calc_accu(test_pos,'pos') + calc_accu(test_neg,'neg')
+
+accu = accu / (len(test_pos)+len(test_neg))
+print("Accuracy of test data : "+ str(accu))
+
+print("Trigram model : ")
+
+#accuracy of test data
+
+accu = 0
+
+accu += calc_accu(test_pos,'pos','b') + calc_accu(test_neg,'neg','b')
 
 accu = accu / (len(test_pos)+len(test_neg))
 print("Accuracy of test data : "+ str(accu))
