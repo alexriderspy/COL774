@@ -103,6 +103,7 @@ for item0 in cnt_neg_lis:
 accu = 0
 
 def calc_accu(files,type):
+    global cnt_pos_lis,cnt_wrds_neg,cnt_wrds_pos,cnt_pos_lis,cnt_wrds,cnt_lis,cnt_neg_lis,pos_prob,neg_prob
     accu = 0
     for file in files:
 

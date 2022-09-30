@@ -58,12 +58,20 @@ neg_prob = cnt_neg/(cnt_pos+cnt_neg)
 snowball = SnowballStemmer(language='english')
 stopwords = STOPWORDS
 stopwords.add('br')
+stopwords.add('th')
+stopwords.add('h')
+stopwords.add('b')
+stopwords.add('thi')
+stopwords.add('re')
+stopwords.add('sh')
+stopwords.add('lik')
 
 for file in my_files_pos:
     txt = open(file,'r').read()
     words = txt.split()
     for w in words:
-        w = snowball.stem(w)
+        if len(w) > 5:
+            w = snowball.stem(w)
         if w in stopwords:
             continue
         if cnt_pos_lis.get(w) == None:
@@ -84,7 +92,8 @@ for file in my_files_neg:
     words = txt.split()
     
     for w in words:
-        w = snowball.stem(w)
+        if len(w) > 5:
+            w = snowball.stem(w)
         if w in stopwords:
             continue
 
@@ -152,6 +161,8 @@ fig.savefig('neg_wc.png')
 accu = 0
 
 def calc_accu(files,type):
+    global cnt_pos_lis,cnt_wrds_neg,cnt_wrds_pos,cnt_pos_lis,cnt_wrds,cnt_lis,cnt_neg_lis,pos_prob,neg_prob
+
     accu = 0
     for file in files:
 
@@ -162,7 +173,8 @@ def calc_accu(files,type):
         log_p_neg = 0
 
         for w in words:
-            w=snowball.stem(w)
+            if len(w) > 5:
+                w = snowball.stem(w)
             if w in stopwords:
                 continue
 
