@@ -1,13 +1,8 @@
 from math import log
-import sys
-import numpy as np
-import pandas as pd
-from PIL import Image
+import sys,os
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud,STOPWORDS
 from nltk.stem import SnowballStemmer
-
-from os import walk
 
 #positive data
 
@@ -30,26 +25,26 @@ cnt_wrds_pos = 0
 cnt_wrds_neg = 0
 cnt_wrds = 0
 
-for (dirpath, dirnames, filenames) in walk(train_path + '/pos'):
+for (dirpath, dirnames, filenames) in os.walk(os.join(train_path,'/pos')):
     for filename in filenames:
         cnt_pos +=1
-        my_files_pos.append(train_path + '/pos/'  + filename)
+        my_files_pos.append(os.join(train_path,'/pos/',filename))
     break
 
-for (dirpath, dirnames, filenames) in walk(test_path + '/pos'):
+for (dirpath, dirnames, filenames) in os.walk(os.join(test_path,'/pos')):
     for filename in filenames:
-        test_pos.append(test_path + '/pos/'  + filename)
+        test_pos.append(os.join(test_path,'/pos/' ,filename))
     break
 
-for (dirpath, dirnames, filenames) in walk(train_path + '/neg'):
+for (dirpath, dirnames, filenames) in os.walk(os.join(train_path,'/neg')):
     for filename in filenames:
         cnt_neg+=1
-        my_files_neg.append(train_path + '/neg/' + filename)
+        my_files_neg.append(os.join(train_path,'/neg/',filename))
     break
 
-for (dirpath, dirnames, filenames) in walk(test_path + '/neg'):
+for (dirpath, dirnames, filenames) in os.walk(os.join(test_path, '/neg')):
     for filename in filenames:
-        test_neg.append(test_path + '/neg/' + filename)
+        test_neg.append(os.join(test_path,'/neg/' ,filename))
     break
 
 pos_prob = cnt_pos/(cnt_pos+cnt_neg)

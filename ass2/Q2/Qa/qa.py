@@ -1,8 +1,13 @@
+import os
 import pickle
+import sys
 import numpy as np
 import cvxopt
 
-file = '../part2_data/train_data.pickle'
+train_path = str(sys.argv[1])
+test_path = str(sys.argv[2])
+
+file = os.join(train_path,'train_data.pickle')
 
 with open(file, 'rb') as fo:
     dict = pickle.load(fo, encoding='bytes')
@@ -46,7 +51,11 @@ _lambda = np.ravel(solution['x'])
 print(_lambda)
 
 S = np.where((_lambda > 1e-10) & (_lambda <= C))[0]
+print('The number of support vectors are : ' + str(len(S)))
+print("Fraction of support vectors : " + str(len(S))/m)
+
 w = K[:, S].dot(_lambda[S])
+
 M = np.where((_lambda > 1e-10) & (_lambda < C))[0]
 b = np.mean(arrY[M] - arrX[M, :].dot(w))
 
