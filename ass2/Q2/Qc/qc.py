@@ -1,8 +1,12 @@
 from sklearn import svm
 import numpy as np
-import pickle
+import pickle,sys,os
 
-file = '../part2_data/train_data.pickle'
+train_path = str(sys.argv[1])
+test_path = str(sys.argv[2])
+
+file = os.path.join(train_path,'train_data.pickle')
+test_file = os.path.join(test_path,'test_data.pickle')
 
 with open(file, 'rb') as fo:
     dict = pickle.load(fo, encoding='bytes')
@@ -29,16 +33,41 @@ arrY = np.array(arrY)
 
 arrX = np.multiply(arrX,1.0)
 
-trainedsvm_linear = svm.SVC(kernel = 'linear').fit(arrX, arrY)
-predictionsvm = trainedsvm_linear.predict(arrX)
+with open(test_file, 'rb') as fo:
+    test_dict = pickle.load(fo, encoding='bytes')
 
-score = trainedsvm_linear.score(arrX,arrY)
+test_labels = test_dict['labels']
+test_data = test_dict['data']
+
+test_arrY = []
+test_arrX = []
+
+#3 -> -1, 4 -> 1
+
+for i in range(len(test_labels)):
+    if test_labels[i] == 3:
+        test_arrX.append(test_data[i].flatten())
+        test_arrY.append(-1)
+    elif test_labels[i]==4:
+        test_arrX.append(test_data[i].flatten())
+        test_arrY.append(1)
+
+test_m = len(test_arrX)
+test_arrX = np.array(test_arrX).reshape(test_m,3072)
+test_arrY = np.array(test_arrY).reshape(test_m,1)
+
+test_arrX = np.multiply(test_arrX,1.0)
+
+trainedsvm_linear = svm.SVC(kernel = 'linear').fit(arrX, arrY)
+
+score = trainedsvm_linear.score(test_arrX,test_arrY)
+support_vector_indices = trainedsvm_linear.support_
+print(len(support_vector_indices))
 print(score)
-#1.0
 
 trainedsvm_gaussian = svm.SVC(kernel = 'rbf').fit(arrX, arrY)
-predictionsvm = trainedsvm_gaussian.predict(arrX)
 
-score = trainedsvm_gaussian.score(arrX,arrY)
+score = trainedsvm_gaussian.score(test_arrX,test_arrY)
+support_vector_indices = trainedsvm_gaussian.support_
+print(len(support_vector_indices))
 print(score)
-#0.904

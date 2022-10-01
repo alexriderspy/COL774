@@ -3,6 +3,7 @@ import pickle
 import sys
 import numpy as np
 import cvxopt
+import matplotlib.pyplot as plt
 
 train_path = str(sys.argv[1])
 test_path = str(sys.argv[2])
@@ -73,15 +74,29 @@ b = cvxopt.matrix(0.0)
 # solve quadratic programming
 cvxopt.solvers.options['show_progress'] = False
 solution = cvxopt.solvers.qp(P, q, G, h, A, b)
-_lambda = np.ravel(solution['x'])
+_lambda = np.ravel(solution['x']).reshape(m,1)
 
-S = np.where((_lambda > 1e-8) & (_lambda <= C))[0]
+#_lambda.sort()
+
+array_images_top5 = np.append(_lambda,arrX,axis=1)
+array_images_top5.sort()
+array_images_top5 = array_images_top5[-5:]
+array_images_top5 = np.delete(array_images_top5,0,1)
+
+for i in range(len(array_images_top5)):
+    array_image = array_images_top5[i]
+    array_image = array_image.reshape((32,32,3)).astype('uint8')
+    plt.imsave('Image_linear_' + str(i)+ '.png',array_image)
+    plt.imshow(array_image, interpolation='nearest')
+    #plt.show()
+
+S = np.where((_lambda > 1e-10) & (_lambda <= C))[0]
 print('The number of support vectors are : ' + str(len(S)))
 print("Fraction of support vectors : " + str(len(S)/m))
 
 w = K[:, S].dot(_lambda[S])
 
-M = np.where((_lambda > 1e-8) & (_lambda < C))[0]
+M = np.where((_lambda > 1e-10) & (_lambda < C))[0]
 b = np.mean(arrY[M] - arrX[M, :].dot(w))
 
 results = np.sign(test_arrX.dot(w) +b)
