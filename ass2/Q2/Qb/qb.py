@@ -4,6 +4,7 @@ import sys
 import numpy as np
 import cvxopt
 import matplotlib.pyplot as plt
+import pylab as pl
 
 train_path = str(sys.argv[1])
 test_path = str(sys.argv[2])
@@ -66,19 +67,24 @@ def gaussian_rbf(X,Y):
 
 C = 1.0
 
-gamma = 0.001
+gamma = 1.0
 
-K = (arrX*arrY).T
-S = np.zeros(m*m).reshape((m,m))
+K = np.zeros((m,m))
 
 for i in range(m):
     for j in range(m):
-        S[i,j] = gaussian_rbf(arrX[i],arrX[j])
+        K[i,j] = gaussian_rbf(arrX[i],arrX[j])
 
-P = cvxopt.matrix((np.multiply(S,arrY)).reshape((m,m)))
+P = cvxopt.matrix(np.outer(arrY,arrY)*K)
 q = cvxopt.matrix(-1 * np.ones(m)) # q has shape m*1
-G = cvxopt.matrix(np.concatenate((-1*np.identity(m), np.identity(m)), axis=0))
-h = cvxopt.matrix(np.concatenate((np.zeros(m), C*np.ones(m)), axis=0))
+
+tmp1 = np.diag(np.ones(m) * -1)
+tmp2 = np.identity(m)
+G = cvxopt.matrix(np.vstack((tmp1, tmp2)))
+tmp1 = np.zeros(m)
+tmp2 = np.ones(m) * C
+h = cvxopt.matrix(np.hstack((tmp1, tmp2)))
+
 A = cvxopt.matrix(1.0 * arrY, (1, m))
 b = cvxopt.matrix(0.0)
 # solve quadratic programming
@@ -89,7 +95,7 @@ _lambda = np.ravel(solution['x'])
 _wts_sv = _lambda.reshape((m,1))
 
 #support vectors
-sv = np.bitwise_and(_lambda>1e-3, _lambda<=C)
+sv = np.bitwise_and(_lambda>1e-5, _lambda<=C)
 indices = np.arange(len(_lambda))[sv]
 _lambda = _lambda[sv]
 sv_x = arrX[sv]
@@ -98,16 +104,38 @@ sv_y = arrY[sv]
 print('The number of support vectors are : ' + str(len(indices)))
 print("Fraction of support vectors : " + str(len(indices)/m))
 
-b=0
+b=0.0
 
 for i in range(len(_lambda)):
     b += sv_y[i]
-    b -= np.sum(_lambda * sv_y * S[indices[i],sv])
+    b -= np.sum(_lambda * sv_y * K[indices[i],sv])
 b /= len(_lambda)
+
+#predict
+y_predict = np.zeros(len(arrX))
+for i in range(len(arrX)):
+    s = 0.0
+    for ai, sv_yi, sv_xi in zip(_lambda, sv_y, sv_x):
+        s += ai * sv_yi * gaussian_rbf(arrX[i], sv_xi)
+    y_predict[i] = s
+
+w = y_predict + b
+
+results = np.sign(w)
+results[results == 0] = 1
+
+#accuracy
+accu = 0.0
+for i in range(len(results)):
+    if results[i]==arrY[i]:
+        accu += 1
+
+score = accu/len(results)
+print('accuracy of train data : ' + str(score))
 
 y_predict = np.zeros(len(test_arrX))
 for i in range(len(test_arrX)):
-    s = 0
+    s = 0.0
     for ai, sv_yi, sv_xi in zip(_lambda, sv_y, sv_x):
         s += ai * sv_yi * gaussian_rbf(test_arrX[i], sv_xi)
     y_predict[i] = s
@@ -117,7 +145,8 @@ w = y_predict + b
 results = np.sign(w)
 results[results == 0] = 1
 
-accu = 0
+#accuracy
+accu = 0.0
 for i in range(len(results)):
     if results[i]==test_arrY[i]:
         accu += 1
