@@ -41,3 +41,4 @@ table_b[4][0] = '3(P)'
 table_b[5][0] = '4(P)' 
 
 print(table_b)
+print(abs(-12))

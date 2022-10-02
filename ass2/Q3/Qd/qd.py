@@ -62,7 +62,7 @@ test_accu = [0 for _ in range(5)]
 iter = 0
 for C in C_values:
     i=0
-    maxi = 0
+    maxi = -10
     trained = None
     while(i<length*5):
         valX = arrX[i:i+length]
@@ -77,7 +77,7 @@ for C in C_values:
         accu/= len(valY)
 
         if accu>maxi:
-            accu = maxi
+            maxi = accu
             trained = model
         i+=length
     

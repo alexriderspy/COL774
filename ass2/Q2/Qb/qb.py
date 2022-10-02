@@ -67,7 +67,7 @@ def gaussian_rbf(X,Y):
 
 C = 1.0
 
-gamma = 0.001
+gamma = 0.0001
 
 K = np.zeros((m,m))
 

@@ -51,7 +51,7 @@ test_arrY = np.ravel(test_arrY)
 
 test_arrX = np.multiply(test_arrX,1.0)
 
-model = SVC(kernel = 'rbf',gamma = 0.001,decision_function_shape='ovo')
+model = SVC(kernel = 'rbf',gamma = 0.0001,decision_function_shape='ovo')
 model.fit(arrX, arrY)
 yhat = model.predict(test_arrX)
 
