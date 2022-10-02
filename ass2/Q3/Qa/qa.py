@@ -61,11 +61,21 @@ test_arrY = np.array(test_arrY).reshape(test_m,1)
 
 test_arrX = np.multiply(test_arrX,1.0)
 
+def gaussian_rbf(X,Y):
+    return np.exp(-gamma*(np.linalg.norm(X-Y)**2))
+
 C = 1.0
 
-# compute inputs for cvxopt solver
-K = (arrX * arrY).T
-P = cvxopt.matrix(K.T.dot(K)) # P has shape m*m
+gamma = 0.001
+
+K = (arrX*arrY).T
+P = np.zeros(m*m).reshape((m,m))
+
+for i in range(m):
+    for j in range(m):
+        P[i,j] = gaussian_rbf(arrX[i],arrX[j])
+
+P = cvxopt.matrix((np.multiply(P,arrY)).reshape((m,m)))
 q = cvxopt.matrix(-1 * np.ones(m)) # q has shape m*1
 G = cvxopt.matrix(np.concatenate((-1*np.identity(m), np.identity(m)), axis=0))
 h = cvxopt.matrix(np.concatenate((np.zeros(m), C*np.ones(m)), axis=0))
@@ -76,6 +86,46 @@ cvxopt.solvers.options['show_progress'] = False
 solution = cvxopt.solvers.qp(P, q, G, h, A, b)
 _lambda = np.ravel(solution['x']).reshape(m,1)
 
+_wts_sv = _lambda
+
+#support vectors
+sv = np.bitwise_and(_lambda>1e-5, _lambda<=C)
+indices = np.arange(len(_lambda))[sv]
+_lambda = _lambda[sv]
+sv = arrX[sv]
+sv_y = arrY[sv]
+
+print('The number of support vectors are : ' + str(len(indices)))
+print("Fraction of support vectors : " + str(len(indices)/m))
+
+b=0
+
+for i in range(len(_lambda)):
+    b += sv_y[i]
+    b -= np.sum(_lambda * sv_y * K[indices[i],sv])
+b /= len(_lambda)
+
+y_predict = np.zeros(len(test_arrX))
+for i in range(len(test_arrX)):
+    s = 0
+    for ai, sv_yi, svi in zip(_lambda, sv_y, sv):
+        s += ai * sv_yi * gaussian_rbf(test_arrX[i], svi)
+    y_predict[i] = s
+
+w = y_predict + b
+
+results = np.sign(w)
+results[results == 0] = 1
+
+accu = 0
+for i in range(len(results)):
+    if results[i]==test_arrY[i]:
+        accu += 1
+
+score = accu/len(results)
+print('accuracy of test data : ' + str(score))
+
+_lambda = _wts_sv
 _lambda.sort()
 
 array_images_top5 = np.append(_lambda,arrX,axis=1)
@@ -86,25 +136,5 @@ array_images_top5 = np.delete(array_images_top5,0,1)
 for i in range(len(array_images_top5)):
     array_image = array_images_top5[i]
     array_image = array_image.reshape((32,32,3)).astype('uint8')
-    plt.imsave('Image_linear_' + str(i)+ '.png',array_image)
+    plt.imsave('Image_gaussian_' + str(i)+ '.png',array_image)
     plt.imshow(array_image, interpolation='nearest')
-
-S = np.where((_lambda > 1e-10) & (_lambda <= C))[0]
-print('The number of support vectors are : ' + str(len(S)))
-print("Fraction of support vectors : " + str(len(S)/m))
-
-w = K[:, S].dot(_lambda[S])
-
-M = np.where((_lambda > 1e-10) & (_lambda < C))[0]
-b = np.mean(arrY[M] - arrX[M, :].dot(w))
-
-results = np.sign(test_arrX.dot(w) +b)
-results[results == 0] = 1
-
-accu = 0
-for i in range(len(results)):
-    if results[i]==test_arrY[i]:
-        accu += 1
-
-score = accu/len(results)
-print('accuracy of test data : ' + str(score))
