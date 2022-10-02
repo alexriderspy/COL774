@@ -4,6 +4,7 @@ from sklearn.svm import SVC
 from sklearn.multiclass import OneVsOneClassifier
 import numpy as np
 import sys,os,pickle
+from sklearn.metrics import confusion_matrix
 
 train_path = str(sys.argv[1])
 test_path = str(sys.argv[2])
@@ -53,27 +54,11 @@ test_arrY = np.ravel(test_arrY)
 
 test_arrX = np.multiply(test_arrX,1.0)
 
-model = SVC()
-ovo = OneVsOneClassifier(model)
-ovo.fit(arrX, arrY)
-yhat = ovo.predict(test_arrX)
+model = SVC(kernel = 'rbf',gamma = 0.001,decision_function_shape='ovo')
+model.fit(arrX, arrY)
+yhat = model.predict(test_arrX)
 
-table_a = np.zeros((6,6))
-table_b = np.zeros((6,6))
+cm = confusion_matrix(test_arrY,yhat)
 
-for i in range(len(test_arrX)):
-    table_b[yhat[i]+1][test_arrY[i]+1] += 1
-
-table_b[0][1] = '0(A)'
-table_b[0][2] = '1(A)'
-table_b[0][3] = '2(A)'
-table_b[0][4] = '3(A)'
-table_b[0][5] = '4(A)'
-
-table_b[1][0] = '0(P)'
-table_b[2][0] = '1(P)'
-table_b[3][0] = '2(P)'
-table_b[4][0] = '3(P)'
-table_b[5][0] = '4(P)' 
-
-print(table_b)
+print("confusion matrix : ")
+print(cm)

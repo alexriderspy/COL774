@@ -65,7 +65,7 @@ support_vector_indices = trainedsvm_linear.support_
 print(len(support_vector_indices))
 print(score)
 
-trainedsvm_gaussian = svm.SVC(kernel = 'rbf').fit(arrX, arrY)
+trainedsvm_gaussian = svm.SVC(kernel = 'rbf',gamma = 0.001).fit(arrX, arrY)
 
 score = trainedsvm_gaussian.score(test_arrX,test_arrY)
 support_vector_indices = trainedsvm_gaussian.support_
