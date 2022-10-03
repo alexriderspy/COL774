@@ -1,6 +1,7 @@
 import numpy as np
 import cvxopt
 import sys,os,pickle
+from functools import cmp_to_key
 
 train_path = str(sys.argv[1])
 test_path = str(sys.argv[2])
@@ -54,7 +55,7 @@ test_arrX = np.multiply(test_arrX,1.0)
 
 test_arrX/=255.0
 
-final_array = np.zeros((5,len(test_arrX))).tolist()
+final_array = np.zeros((len(test_arrX),5)).tolist()
 
 C = 1.0
 
@@ -136,23 +137,35 @@ for l0 in range(5):
         
         for i in range(len(results)):
             if (score[i]<0 and test_arrY[i]==l0):
-                if final_array[l0][i]==0:
-                    final_array[l0][i] = (1,abs(score[i]))
+                if final_array[i][l0]==0:
+                    final_array[i][l0] = (1,abs(score[i]))
                 else:
-                    prev = final_array[l0][i][0]
-                    if abs(score[i]) > abs(final_array[l0][i][1]):
-                        final_array[l0][i] = (prev+1,abs(score[i]))
-                    else:
-                        final_array[l0][i] = (prev+1,abs(final_array[l0][i][1]))
+                    prev = final_array[i][l0][0]
+                    final_array[i][l0] = (prev+1,abs(final_array[i][l0][1])+abs(score[i]))
             elif (score[i]>0 and test_arrY[i]==l1):
-                if final_array[l1][i]==0:
-                    final_array[l1][i] = (1,abs(score[i]))
+                if final_array[i][l1]==0:
+                    final_array[i][l1] = (1,abs(score[i]))
                 else:
-                    prev = final_array[l1][i][0]
-                    if abs(score[i]) > abs(final_array[l1][i][1]):
-                        final_array[l1][i] = (prev+1,abs(score[i]))
-                    else:
-                        final_array[l1][i] = (prev+1,abs(final_array[l1][i][1]))
+                    prev = final_array[i][l1][0]
+                    final_array[i][l1] = (prev+1,abs(final_array[i][l1][1])+abs(score[i]))
 
+def compare(x,y):
+    if x[0] == y[0]:
+        return x[1] - y[1]
+    else:
+        return x[0] - y[0]
 
+accu = 0.0
+
+for i in range(len(test_arrX)):
+    get_scores = final_array[i]
+    for j in range(len(get_scores)):
+        get_scores[j] = (final_array[i][0],final_array[i][1],j)
+    sorted(get_scores, key = cmp_to_key(compare))
+    y_pred = get_scores[-1][2]
+    if y_pred == test_arrY[i]:
+        accu += 1
+
+accu/=len(test_arrX)
+print("Accuracy of test data : " + str(accu))
 
