@@ -1,6 +1,7 @@
 import os
 import pickle
 import sys
+from unittest import result
 import numpy as np
 import cvxopt
 import matplotlib.pyplot as plt
@@ -103,13 +104,6 @@ sv_y = arrY[sv]
 print('The number of support vectors are : ' + str(len(indices)))
 print("Fraction of support vectors : " + str(len(indices)/m))
 
-b=0.0
-
-for i in range(len(_lambda)):
-    b += sv_y[i]
-    b -= np.sum(_lambda * sv_y * K[indices[i],sv])
-b /= len(_lambda)
-
 #predict
 y_predict = np.zeros(len(arrX))
 for i in range(len(arrX)):
@@ -118,8 +112,12 @@ for i in range(len(arrX)):
         s += ai * sv_yi * gaussian_rbf(arrX[i], sv_xi)
     y_predict[i] = s
 
-w = y_predict + b
+b = 0.0
+for i in range(len(arrX)):
+    b += (arrY[i] - y_predict[i])
+b/=len(arrX)
 
+w = y_predict + b
 results = np.sign(w)
 results[results == 0] = 1
 

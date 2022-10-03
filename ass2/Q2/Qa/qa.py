@@ -24,10 +24,10 @@ arrX = []
 
 for i in range(len(labels)):
     if labels[i] == 3:
-        arrX.append(data[i].flatten())
+        arrX.append(data[i].reshape((3072,1)))
         arrY.append(-1)
     elif labels[i]==4:
-        arrX.append(data[i].flatten())
+        arrX.append(data[i].reshape((3072,1)))
         arrY.append(1)
 
 m = len(arrX)
@@ -51,10 +51,10 @@ test_arrX = []
 
 for i in range(len(test_labels)):
     if test_labels[i] == 3:
-        test_arrX.append(test_data[i].flatten())
+        test_arrX.append(test_data[i].reshape((3072,1)))
         test_arrY.append(-1)
     elif test_labels[i]==4:
-        test_arrX.append(test_data[i].flatten())
+        test_arrX.append(test_data[i].reshape((3072,1)))
         test_arrY.append(1)
 
 test_m = len(test_arrX)
@@ -109,6 +109,8 @@ array_images_top5 = np.delete(array_images_top5,0,1)
 
 for i in range(len(array_images_top5)):
     array_image = array_images_top5[i]
-    array_image = array_image.reshape((32,32,3)).astype('uint8')
+    
+    array_image = array_image.reshape((32,32,3))
+    
     plt.imsave('Image_linear_' + str(i)+ '.png',array_image)
     plt.imshow(array_image, interpolation='nearest')

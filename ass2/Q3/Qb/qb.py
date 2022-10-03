@@ -1,5 +1,4 @@
 from sklearn.svm import SVC
-from sklearn.multiclass import OneVsOneClassifier
 import numpy as np
 import sys,os,pickle
 
