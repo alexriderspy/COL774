@@ -110,11 +110,6 @@ for l0 in range(5):
         sv_x = arrX[sv]
         sv_y = arrY[sv]
 
-        b = 0.0
-        for i in range(len(arrX)):
-            b += (arrY[i] - y_predict[i])
-        b/=len(arrX)
-
         y_predict = np.zeros(len(test_arrX))
         for i in range(len(test_arrX)):
             s = 0.0
@@ -122,20 +117,17 @@ for l0 in range(5):
                 s += ai * sv_yi * gaussian_rbf(test_arrX[i], sv_xi)
             y_predict[i] = s
 
+        b = 0.0
+        for i in range(len(arrX)):
+            b += (arrY[i] - y_predict[i])
+        b/=len(arrX)
+
         w = y_predict + b
 
-        results = np.sign(w)
-        results[results == 0] = 1
+        score = np.sign(w)
+        score[score == 0] = 1
 
-        #accuracy
-        accu = 0.0
-        for i in range(len(results)):
-            if results[i]==test_arrY[i]:
-                accu += 1
-
-        score = accu/len(results)
-        
-        for i in range(len(results)):
+        for i in range(len(score)):
             if (score[i]<0 and test_arrY[i]==l0):
                 if final_array[i][l0]==0:
                     final_array[i][l0] = (1,abs(score[i]))

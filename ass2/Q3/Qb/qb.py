@@ -63,4 +63,3 @@ yhat = model.predict(test_arrX)
 accu = np.sum(yhat == test_arrY)
 accu/= len(test_arrY)
 print("Accuracy of test data : " + str(accu))
-#0.638 is accuracy
