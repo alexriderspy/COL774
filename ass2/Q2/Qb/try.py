@@ -45,3 +45,9 @@ print(abs(-12))
 
 for i in range(3,-1,-1):
     print (i)
+
+
+x = np.ones((10,1))
+z = np.array([10,1,23,45,6,7,89,5,5,2]).reshape((10,1))
+y = x*x*z
+print(y)

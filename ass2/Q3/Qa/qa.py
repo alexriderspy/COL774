@@ -67,6 +67,7 @@ def gaussian_rbf(X,Y):
 
 for l0 in range(5):
     for l1 in range(l0,5):
+        print("helo")
         arrY = []
         arrX = []
 
@@ -110,16 +111,12 @@ for l0 in range(5):
         sv_x = arrX[sv]
         sv_y = arrY[sv]
 
-        y_predict = np.zeros(len(test_arrX))
+        y_predict = np.zeros((len(test_arrX),1))
         for i in range(len(test_arrX)):
-            s = 0.0
-            for ai, sv_yi, sv_xi in zip(_lambda, sv_y, sv_x):
-                s += ai * sv_yi * gaussian_rbf(test_arrX[i], sv_xi)
-            y_predict[i] = s
+            y_predict[i] = np.sum(_lambda*sv_y*(np.dot(test_arrX[i],(sv_x.T)).T))
 
         b = 0.0
-        for i in range(len(arrX)):
-            b += (arrY[i] - y_predict[i])
+        b = np.sum(arrY-y_predict)
         b/=len(arrX)
 
         w = y_predict + b

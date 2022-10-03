@@ -1,11 +1,9 @@
 import os
 import pickle
 import sys
-from unittest import result
 import numpy as np
 import cvxopt
 import matplotlib.pyplot as plt
-import pylab as pl
 
 train_path = str(sys.argv[1])
 test_path = str(sys.argv[2])
@@ -105,16 +103,11 @@ print('The number of support vectors are : ' + str(len(indices)))
 print("Fraction of support vectors : " + str(len(indices)/m))
 
 #predict
-y_predict = np.zeros(len(arrX))
+y_predict = np.zeros((len(arrX),1))
 for i in range(len(arrX)):
-    s = 0.0
-    for ai, sv_yi, sv_xi in zip(_lambda, sv_y, sv_x):
-        s += ai * sv_yi * gaussian_rbf(arrX[i], sv_xi)
-    y_predict[i] = s
+    y_predict[i] = np.sum(_lambda*sv_y*(gaussian_rbf(arrX[i],(sv_x.T)).T))
 
-b = 0.0
-for i in range(len(arrX)):
-    b += (arrY[i] - y_predict[i])
+b = np.sum(arrY-y_predict)
 b/=len(arrX)
 
 w = y_predict + b
@@ -130,12 +123,9 @@ for i in range(len(results)):
 score = accu/len(results)
 print('accuracy of train data : ' + str(score))
 
-y_predict = np.zeros(len(test_arrX))
+y_predict = np.zeros((len(test_arrX),1))
 for i in range(len(test_arrX)):
-    s = 0.0
-    for ai, sv_yi, sv_xi in zip(_lambda, sv_y, sv_x):
-        s += ai * sv_yi * gaussian_rbf(test_arrX[i], sv_xi)
-    y_predict[i] = s
+    y_predict[i] = np.sum(_lambda*sv_y*(np.dot(test_arrX[i],(sv_x.T)).T))
 
 w = y_predict + b
 
