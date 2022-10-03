@@ -31,6 +31,8 @@ arrY = np.ravel(arrY)
 
 arrX = np.multiply(arrX,1.0)
 
+arrX/=255.0
+
 with open(test_file, 'rb') as fo:
     test_dict = pickle.load(fo, encoding='bytes')
 
@@ -51,6 +53,8 @@ test_arrX = np.array(test_arrX).reshape(test_m,3072)
 test_arrY = np.ravel(test_arrY)
 
 test_arrX = np.multiply(test_arrX,1.0)
+
+test_arrX/=255.0
 
 C_values = [1e-5,1e-3,1,5,10]
 gamma = 0.001

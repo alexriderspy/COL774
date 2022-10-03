@@ -37,6 +37,8 @@ arrY = np.array(arrY).reshape(m,1)
 
 arrX = np.multiply(arrX,1.0)
 
+arrX/=255.0
+
 with open(test_file, 'rb') as fo:
     test_dict = pickle.load(fo, encoding='bytes')
 
@@ -62,29 +64,26 @@ test_arrY = np.array(test_arrY).reshape(test_m,1)
 
 test_arrX = np.multiply(test_arrX,1.0)
 
-def gaussian_rbf(X,Y):
-    return np.exp(-gamma*(np.linalg.norm(X-Y)**2))
+test_arrX/=255.0
 
 C = 1.0
 
-gamma = 0.0001
+gamma = 0.001
 
 K = np.zeros((m,m))
 
+def gaussian_rbf(X,Y):
+    global gamma
+    return np.exp(-gamma*(np.linalg.norm(X-Y)**2))
+
 for i in range(m):
     for j in range(m):
-        K[i,j] = gaussian_rbf(arrX[i],arrX[j])
+        K[i,j] = gaussian_rbf(arrX[i],arrX[j])*arrY[i]*arrY[j]
 
-P = cvxopt.matrix(np.outer(arrY,arrY)*K)
+P = cvxopt.matrix(K)
 q = cvxopt.matrix(-1 * np.ones(m)) # q has shape m*1
-
-tmp1 = np.diag(np.ones(m) * -1)
-tmp2 = np.identity(m)
-G = cvxopt.matrix(np.vstack((tmp1, tmp2)))
-tmp1 = np.zeros(m)
-tmp2 = np.ones(m) * C
-h = cvxopt.matrix(np.hstack((tmp1, tmp2)))
-
+G = cvxopt.matrix(np.concatenate((-1*np.identity(m), np.identity(m)), axis=0))
+h = cvxopt.matrix(np.concatenate((np.zeros(m), C*np.ones(m)), axis=0))
 A = cvxopt.matrix(1.0 * arrY, (1, m))
 b = cvxopt.matrix(0.0)
 # solve quadratic programming
@@ -164,6 +163,7 @@ array_images_top5 = np.delete(array_images_top5,0,1)
 
 for i in range(len(array_images_top5)):
     array_image = array_images_top5[i]
+    array_image*=255.0
     array_image = array_image.reshape((32,32,3)).astype('uint8')
     plt.imsave('Image_gaussian_' + str(i)+ '.png',array_image)
     plt.imshow(array_image, interpolation='nearest')

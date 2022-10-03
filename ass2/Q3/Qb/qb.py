@@ -30,6 +30,10 @@ arrY = np.ravel(arrY)
 
 arrX = np.multiply(arrX,1.0)
 
+meanX = np.mean(arrX)
+stdX = np.std(arrX)
+arrX/=255.0
+
 with open(test_file, 'rb') as fo:
     test_dict = pickle.load(fo, encoding='bytes')
 
@@ -51,7 +55,9 @@ test_arrY = np.ravel(test_arrY)
 
 test_arrX = np.multiply(test_arrX,1.0)
 
-model = SVC(kernel = 'rbf',gamma = 0.0001,decision_function_shape='ovo')
+test_arrX/=255.0
+
+model = SVC(kernel = 'rbf',gamma = 0.001,decision_function_shape='ovo')
 model.fit(arrX, arrY)
 yhat = model.predict(test_arrX)
 

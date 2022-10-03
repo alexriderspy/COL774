@@ -72,7 +72,4 @@ for l0 in range(5):
                         final_array[l1][i] = (prev+1,abs(final_array[l1][i][1]))
 
 
-        
-
-
 

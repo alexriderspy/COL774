@@ -36,6 +36,8 @@ arrY = np.array(arrY).reshape(m,1)
 
 arrX = np.multiply(arrX,1.0)
 
+arrX/=255.0
+
 with open(test_file, 'rb') as fo:
     test_dict = pickle.load(fo, encoding='bytes')
 
@@ -61,6 +63,8 @@ test_arrY = np.array(test_arrY).reshape(test_m,1)
 
 test_arrX = np.multiply(test_arrX,1.0)
 
+test_arrX/=255.0
+
 C = 1.0
 
 # compute inputs for cvxopt solver
@@ -76,13 +80,13 @@ cvxopt.solvers.options['show_progress'] = False
 solution = cvxopt.solvers.qp(P, q, G, h, A, b)
 _lambda = np.ravel(solution['x']).reshape(m,1)
 
-S = np.where((_lambda > 1e-10) & (_lambda <= C))[0]
+S = np.where((_lambda > 1e-8) & (_lambda <= C))[0]
 print('The number of support vectors are : ' + str(len(S)))
 print("Fraction of support vectors : " + str(len(S)/m))
 
 w = K[:, S].dot(_lambda[S])
 
-M = np.where((_lambda > 1e-10) & (_lambda < C))[0]
+M = np.where((_lambda > 1e-8) & (_lambda < C))[0]
 b = np.mean(arrY[M] - arrX[M, :].dot(w))
 
 results = np.sign(test_arrX.dot(w) +b)

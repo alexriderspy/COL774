@@ -33,6 +33,10 @@ arrY = np.array(arrY)
 
 arrX = np.multiply(arrX,1.0)
 
+meanX = np.mean(arrX)
+stdX = np.std(arrX)
+arrX = (arrX - meanX)/stdX
+
 with open(test_file, 'rb') as fo:
     test_dict = pickle.load(fo, encoding='bytes')
 
@@ -57,6 +61,8 @@ test_arrX = np.array(test_arrX).reshape(test_m,3072)
 test_arrY = np.array(test_arrY).reshape(test_m,1)
 
 test_arrX = np.multiply(test_arrX,1.0)
+
+test_arrX = (test_arrX - meanX)/stdX
 
 trainedsvm_linear = svm.SVC(kernel = 'linear').fit(arrX, arrY)
 
