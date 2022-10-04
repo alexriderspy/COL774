@@ -1,7 +1,6 @@
 import numpy as np
 
 from sklearn.svm import SVC
-from sklearn.multiclass import OneVsOneClassifier
 import numpy as np
 import sys,os,pickle
 from sklearn.metrics import confusion_matrix

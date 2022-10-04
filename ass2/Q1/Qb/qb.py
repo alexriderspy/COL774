@@ -9,14 +9,14 @@ test_path = str(sys.argv[2])
 test_pos = []
 test_neg = []
 
-for (dirpath, dirnames, filenames) in os.walk(os.path.join(test_path,'/pos')):
+for (dirpath, dirnames, filenames) in os.walk(test_path + '/pos/'):
     for filename in filenames:
-        test_pos.append(os.path.join(test_path,'/pos/' ,filename))
+        test_pos.append(test_path+'/pos/' +filename)
     break
 
-for (dirpath, dirnames, filenames) in os.walk(os.path.join(test_path, '/neg')):
+for (dirpath, dirnames, filenames) in os.walk(test_path+'/neg/'):
     for filename in filenames:
-        test_neg.append(os.path.join(test_path,'/neg/' ,filename))
+        test_neg.append(test_path+'/neg/' +filename)
     break
 
 accu = 0

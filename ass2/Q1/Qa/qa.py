@@ -1,8 +1,5 @@
 from math import log
 import sys
-import numpy as np
-import pandas as pd
-from PIL import Image
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 
@@ -179,4 +176,3 @@ accu += calc_accu(test_pos,'pos') + calc_accu(test_neg,'neg')
 
 accu = accu / (len(test_pos)+len(test_neg))
 print("Accuracy of test data : "+ str(accu))
-

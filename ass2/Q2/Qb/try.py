@@ -50,10 +50,5 @@ def gaussian_rbf(X,Y):
 x = np.array([[10,1,3],[5,5,3]])
 y = np.array([[10,1,5],[5,5,7]])
 
-print(gaussian_rbf(x,y))
-x=np.array([10,1,3])
-y=np.tile(x,(5,1))
-print(y)
 
-x=np.round(4.5)
-print(x)
+print(x[:,None])

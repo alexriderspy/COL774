@@ -101,22 +101,19 @@ sv_y = arrY[sv].reshape((num_sv,1))
 print('The number of support vectors are : ' + str(num_sv))
 print("Fraction of support vectors : " + str(num_sv/m))
 
-#predict
-y_predict = np.zeros((m,1))
-testy_predict = np.zeros((test_m,1))
-
 mul = _lambda*sv_y
+sv_X_norm = np.sum(sv_x ** 2, axis = -1)
+K = np.exp(-gamma * (X_norm[:,None] + sv_X_norm[None,:] - 2 * np.dot(arrX, sv_x.T)))
 
-for i in range(m):
-    y_predict[i] = np.sum(mul*gaussian_rbf(arrX[i],sv_x).reshape((num_sv,1)))
-    if i<test_m:
-        testy_predict[i] = np.sum(mul*gaussian_rbf(test_arrX[i],sv_x).reshape((num_sv,1)))
+y_predict = np.sum(mul * K.T,axis=0).reshape((m,1))
 
 b = np.sum(arrY-y_predict)
 b/=len(arrX)
 
-#testy_predict = np.sum(mul*gaussian_rbf(test_arrX,sv_x).reshape((num_sv,1)),axis=0).reshape((num_sv,1))
+testX_norm = np.sum(test_arrX ** 2, axis = -1)
+K = np.exp(-gamma * (testX_norm[:,None] + sv_X_norm[None,:] - 2 * np.dot(test_arrX, sv_x.T)))
 
+testy_predict = np.sum(mul * K.T,axis=0).reshape((test_m,1))
 w = testy_predict + b
 
 results = np.sign(w)

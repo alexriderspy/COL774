@@ -1,3 +1,4 @@
+import random
 import numpy as np
 
 from sklearn import svm
@@ -24,6 +25,11 @@ arrX = []
 for i in range(len(labels)):
     arrX.append(data[i].flatten())
     arrY.append(labels[i])
+
+arrX = np.append(arrX,arrY,axis=1)
+random.shuffle(arrX)
+arrY = arrX[:,3072]
+arrX = np.delete(arrX,3072,1)
 
 m = len(arrX)
 arrX = np.array(arrX).reshape(m,3072)
@@ -80,7 +86,7 @@ for C in C_values:
         
         accu = np.sum(yhat == valY)
         accu/= len(valY)
-
+        #print(accu)
         avg_val += accu
         if accu>maxi:
             maxi = accu
@@ -94,11 +100,17 @@ for C in C_values:
     test_accu[iter]=accu
     iter += 1
 
+print("Validation accuracy for each value of C : ")
+print(val_accu)
+print("Test accuracy for each value of C : ")
+print(test_accu)
+
 plt.xlabel('C')
 plt.ylabel('validation accuracy')
 plt.plot(C_values,val_accu)
 plt.savefig('val_accuracy vs C')
 
+plt.figure()
 plt.xlabel('C')
 plt.ylabel('test accuracy')
 plt.plot(C_values,test_accu)

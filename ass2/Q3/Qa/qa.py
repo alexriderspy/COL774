@@ -108,18 +108,20 @@ for l0 in range(5):
         sv_x = arrX[sv].reshape((num_sv,3072))
         sv_y = arrY[sv].reshape((num_sv,1))
 
-        y_predict = np.zeros((m,1))
-        for i in range(m):
-            y_predict[i] = np.sum(_lambda*sv_y*gaussian_rbf(np.tile(arrX[i],(num_sv,1)),sv_x).reshape((num_sv,1)))
+        mul = _lambda*sv_y
+        sv_X_norm = np.sum(sv_x ** 2, axis = -1)
+        K = np.exp(-gamma * (X_norm[:,None] + sv_X_norm[None,:] - 2 * np.dot(arrX, sv_x.T)))
+
+        y_predict = np.sum(mul * K.T,axis=0).reshape((m,1))
 
         b = np.sum(arrY-y_predict)
         b/=len(arrX)
 
-        y_predict = np.zeros((test_m,1))
-        for i in range(test_m):
-            y_predict[i] = np.sum(_lambda*sv_y*gaussian_rbf(np.tile(test_arrX[i],(num_sv,1)),sv_x).reshape((num_sv,1)))
+        testX_norm = np.sum(test_arrX ** 2, axis = -1)
+        K = np.exp(-gamma * (testX_norm[:,None] + sv_X_norm[None,:] - 2 * np.dot(test_arrX, sv_x.T)))
 
-        w = y_predict + b
+        testy_predict = np.sum(mul * K.T,axis=0).reshape((test_m,1))
+        w = testy_predict + b
 
         score = np.sign(w)
         score[score == 0] = 1
@@ -149,7 +151,7 @@ accu = 0.0
 for i in range(len(test_arrX)):
     get_scores = final_array[i]
     for j in range(len(get_scores)):
-        get_scores[j] = (final_array[i][0],final_array[i][1],j)
+        get_scores[j] = (final_array[i][j][0],final_array[i][j][1],j)
     sorted(get_scores, key = cmp_to_key(compare))
     y_pred = get_scores[-1][2]
     if y_pred == test_arrY[i]:
