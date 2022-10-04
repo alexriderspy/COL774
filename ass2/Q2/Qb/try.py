@@ -1,3 +1,5 @@
+from math import gamma
+from random import gauss
 import numpy as np
 
 l = np.array([5.9,2]).reshape(2,1).astype('uint8')
@@ -40,14 +42,15 @@ table_b[3][0] = '2(P)'
 table_b[4][0] = '3(P)'
 table_b[5][0] = '4(P)' 
 
-print(table_b)
-print(abs(-12))
+gamma = 0.1
+def gaussian_rbf(X,Y):
+    global gamma
+    return np.exp(-gamma*(np.linalg.norm(X-Y,axis=1)**2))
 
-for i in range(3,-1,-1):
-    print (i)
+x = np.array([[10,1,3],[5,5,3]])
+y = np.array([[10,1,5],[5,5,7]])
 
-
-x = np.ones((10,1))
-z = np.array([10,1,23,45,6,7,89,5,5,2]).reshape((10,1))
-y = x*x*z
+print(gaussian_rbf(x,y))
+x=np.array([10,1,3])
+y=np.tile(x,(5,1))
 print(y)

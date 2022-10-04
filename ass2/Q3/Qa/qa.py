@@ -63,11 +63,10 @@ gamma = 0.001
 
 def gaussian_rbf(X,Y):
     global gamma
-    return np.exp(-gamma*(np.linalg.norm(X-Y)**2))
+    return np.exp(-gamma*(np.linalg.norm(X-Y,axis=1)**2))
 
 for l0 in range(5):
     for l1 in range(l0,5):
-        print("helo")
         arrY = []
         arrX = []
 
@@ -90,34 +89,37 @@ for l0 in range(5):
         K = np.zeros((m,m))
 
         for i in range(m):
-            for j in range(m):
-                K[i,j] = gaussian_rbf(arrX[i],arrX[j])*arrY[i]*arrY[j]
+            K[i] = gaussian_rbf(np.tile(arrX[i],(len(arrX),1)),arrX).reshape((1,m))
 
-        P = cvxopt.matrix(K)
+        P = cvxopt.matrix(np.outer(arrY,arrY)  * K)
         q = cvxopt.matrix(-1 * np.ones(m)) # q has shape m*1
         G = cvxopt.matrix(np.concatenate((-1*np.identity(m), np.identity(m)), axis=0))
         h = cvxopt.matrix(np.concatenate((np.zeros(m), C*np.ones(m)), axis=0))
         A = cvxopt.matrix(1.0 * arrY, (1, m))
         b = cvxopt.matrix(0.0)
         # solve quadratic programming
-        cvxopt.solvers.options['show_progress'] = False
+        #cvxopt.solvers.options['show_progress'] = False
         solution = cvxopt.solvers.qp(P, q, G, h, A, b)
         _lambda = np.ravel(solution['x'])
 
         #support vectors
-        sv = np.bitwise_and(_lambda>1e-5, _lambda<=C)
+        sv = np.bitwise_and(_lambda>1e-8, _lambda<=C)
         indices = np.arange(len(_lambda))[sv]
-        _lambda = _lambda[sv]
-        sv_x = arrX[sv]
-        sv_y = arrY[sv]
+        num_sv = len(indices)
+        _lambda = _lambda[sv].reshape((num_sv,1))
+        sv_x = arrX[sv].reshape((num_sv,3072))
+        sv_y = arrY[sv].reshape((num_sv,1))
 
-        y_predict = np.zeros((len(test_arrX),1))
-        for i in range(len(test_arrX)):
-            y_predict[i] = np.sum(_lambda*sv_y*(np.dot(test_arrX[i],(sv_x.T)).T))
+        y_predict = np.zeros((m,1))
+        for i in range(m):
+            y_predict[i] = np.sum(_lambda*sv_y*gaussian_rbf(np.tile(arrX[i],(num_sv,1)),sv_x).reshape((num_sv,1)))
 
-        b = 0.0
         b = np.sum(arrY-y_predict)
         b/=len(arrX)
+
+        y_predict = np.zeros((test_m,1))
+        for i in range(test_m):
+            y_predict[i] = np.sum(_lambda*sv_y*gaussian_rbf(np.tile(test_arrX[i],(num_sv,1)),sv_x).reshape((num_sv,1)))
 
         w = y_predict + b
 
