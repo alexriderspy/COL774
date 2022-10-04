@@ -25,26 +25,26 @@ cnt_wrds_pos = 0
 cnt_wrds_neg = 0
 cnt_wrds = 0
 
-for (dirpath, dirnames, filenames) in os.walk(os.path.join(train_path,'/pos')):
+for (dirpath, dirnames, filenames) in os.walk(train_path + '/pos/'):
     for filename in filenames:
         cnt_pos +=1
-        my_files_pos.append(os.path.join(train_path,'/pos/',filename))
+        my_files_pos.append(train_path + '/pos/' + filename)
     break
 
-for (dirpath, dirnames, filenames) in os.walk(os.path.join(test_path,'/pos')):
+for (dirpath, dirnames, filenames) in os.walk(test_path + '/pos/'):
     for filename in filenames:
-        test_pos.append(os.path.join(test_path,'/pos/' ,filename))
+        test_pos.append(test_path+'/pos/' +filename)
     break
 
-for (dirpath, dirnames, filenames) in os.walk(os.path.join(train_path,'/neg')):
+for (dirpath, dirnames, filenames) in os.walk(train_path+'/neg/'):
     for filename in filenames:
         cnt_neg+=1
-        my_files_neg.append(os.path.join(train_path,'/neg/',filename))
+        my_files_neg.append(train_path+'/neg/'+filename)
     break
 
-for (dirpath, dirnames, filenames) in os.walk(os.path.join(test_path, '/neg')):
+for (dirpath, dirnames, filenames) in os.walk(test_path+'/neg/'):
     for filename in filenames:
-        test_neg.append(os.path.join(test_path,'/neg/' ,filename))
+        test_neg.append(test_path+'/neg/' +filename)
     break
 
 pos_prob = cnt_pos/(cnt_pos+cnt_neg)
@@ -131,7 +131,7 @@ fig.set_figheight(18)
 
 plt.imshow(wc_pos, interpolation='bilinear')
 plt.axis('off')
-fig.savefig('pos_wc.png')
+fig.savefig('pos_wc_s.png')
 
 wc_neg = WordCloud(
     background_color='white',
@@ -147,7 +147,7 @@ fig.set_figheight(18)
 
 plt.imshow(wc_neg, interpolation='bilinear')
 plt.axis('off')
-fig.savefig('neg_wc.png')
+fig.savefig('neg_wc_s.png')
 
 #accuracy for a .txt file
 
@@ -190,14 +190,9 @@ def calc_accu(files,type):
             accu += 1
     return accu
 
-accu += calc_accu(my_files_pos,'pos') + calc_accu(my_files_neg,'neg')
-
-accu = accu / (len(my_files_pos)+len(my_files_neg))
-print("Accuracy of train data : "+ str(accu))
-
 #accuracy of test data
 
-accu = 0
+accu = 0.0
 
 accu += calc_accu(test_pos,'pos') + calc_accu(test_neg,'neg')
 

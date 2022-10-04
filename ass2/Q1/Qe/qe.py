@@ -36,26 +36,26 @@ cnt3_wrds_pos = 0
 cnt3_wrds_neg = 0
 cnt3_wrds = 0
 
-for (dirpath, dirnames, filenames) in os.walk(os.path.join(train_path,'/pos')):
+for (dirpath, dirnames, filenames) in os.walk(train_path + '/pos/'):
     for filename in filenames:
         cnt_pos +=1
-        my_files_pos.append(os.path.join(train_path,'/pos/',filename))
+        my_files_pos.append(train_path + '/pos/' + filename)
     break
 
-for (dirpath, dirnames, filenames) in os.walk(os.path.join(test_path,'/pos')):
+for (dirpath, dirnames, filenames) in os.walk(test_path + '/pos/'):
     for filename in filenames:
-        test_pos.append(os.path.join(test_path,'/pos/' ,filename))
+        test_pos.append(test_path+'/pos/' +filename)
     break
 
-for (dirpath, dirnames, filenames) in os.walk(os.path.join(train_path,'/neg')):
+for (dirpath, dirnames, filenames) in os.walk(train_path+'/neg/'):
     for filename in filenames:
         cnt_neg+=1
-        my_files_neg.append(os.path.join(train_path,'/neg/',filename))
+        my_files_neg.append(train_path+'/neg/'+filename)
     break
 
-for (dirpath, dirnames, filenames) in os.walk(os.path.join(test_path, '/neg')):
+for (dirpath, dirnames, filenames) in os.walk(test_path+'/neg/'):
     for filename in filenames:
-        test_neg.append(os.path.join(test_path,'/neg/' ,filename))
+        test_neg.append(test_path+'/neg/' +filename)
     break
 
 pos_prob = cnt_pos/(cnt_pos+cnt_neg)
@@ -219,6 +219,7 @@ def calc_accu(files,type,part='a'):
             else:
                 log_p_neg += log((1+cnt_neg_lis[w])/(cnt_wrds_neg + len(cnt_lis)))
 
+        
         for i in range(len(new_words)-1):
             w0 = new_words[i]
             w1 = new_words[i+1]

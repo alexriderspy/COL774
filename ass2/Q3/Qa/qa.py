@@ -15,22 +15,7 @@ with open(file, 'rb') as fo:
 labels = dict['labels']
 data = dict['data']
 
-arrY = []
-arrX = []
-
-#3 -> -1, 4 -> 1
-
-for i in range(len(labels)):
-    arrX.append(data[i].flatten())
-    arrY.append(labels[i])
-
-m = len(arrX)
-arrX = np.array(arrX).reshape(m,3072)
-arrY = np.ravel(arrY)
-
-arrX = np.multiply(arrX,1.0)
-
-arrX/=255.0
+data = (data*1.0)/255.0
 
 with open(test_file, 'rb') as fo:
     test_dict = pickle.load(fo, encoding='bytes')
@@ -60,10 +45,6 @@ final_array = np.zeros((len(test_arrX),5)).tolist()
 C = 1.0
 
 gamma = 0.001
-
-def gaussian_rbf(X,Y):
-    global gamma
-    return np.exp(-gamma*(np.linalg.norm(X-Y,axis=1)**2))
 
 for l0 in range(5):
     for l1 in range(l0+1,5):
