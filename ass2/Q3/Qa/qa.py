@@ -66,12 +66,12 @@ def gaussian_rbf(X,Y):
     return np.exp(-gamma*(np.linalg.norm(X-Y,axis=1)**2))
 
 for l0 in range(5):
-    for l1 in range(l0,5):
+    for l1 in range(l0+1,5):
         arrY = []
         arrX = []
 
         #l0 -> -1, l1 -> 1
-
+        
         for i in range(len(labels)):
             if labels[i] == l0:
                 arrX.append(data[i].flatten())
@@ -86,10 +86,8 @@ for l0 in range(5):
 
         arrX = np.multiply(arrX,1.0)
 
-        K = np.zeros((m,m))
-
-        for i in range(m):
-            K[i] = gaussian_rbf(np.tile(arrX[i],(len(arrX),1)),arrX).reshape((1,m))
+        X_norm = np.sum(arrX ** 2, axis = -1)
+        K = np.exp(-gamma * (X_norm[:,None] + X_norm[None,:] - 2 * np.dot(arrX, arrX.T)))
 
         P = cvxopt.matrix(np.outer(arrY,arrY)  * K)
         q = cvxopt.matrix(-1 * np.ones(m)) # q has shape m*1

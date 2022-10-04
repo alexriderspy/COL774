@@ -69,14 +69,12 @@ C = 1.0
 
 gamma = 0.001
 
-K = np.zeros((m,m))
-
 def gaussian_rbf(X,Y):
     global gamma
     return np.exp(-gamma*(np.linalg.norm(X-Y, axis=1)**2))
 
-for i in range(m):
-    K[i] = gaussian_rbf(np.tile(arrX[i],(len(arrX),1)),arrX).reshape((1,m))
+X_norm = np.sum(arrX ** 2, axis = -1)
+K = np.exp(-gamma * (X_norm[:,None] + X_norm[None,:] - 2 * np.dot(arrX, arrX.T)))
 
 P = cvxopt.matrix(np.outer(arrY,arrY)  * K)
 q = cvxopt.matrix(-1 * np.ones(m)) # q has shape m*1
@@ -104,17 +102,21 @@ print("Fraction of support vectors : " + str(num_sv/m))
 
 #predict
 y_predict = np.zeros((m,1))
+testy_predict = np.zeros((test_m,1))
+
 for i in range(m):
     y_predict[i] = np.sum(_lambda*sv_y*gaussian_rbf(np.tile(arrX[i],(num_sv,1)),sv_x).reshape((num_sv,1)))
+    if i<test_m:
+        testy_predict[i] = np.sum(_lambda*sv_y*gaussian_rbf(np.tile(test_arrX[i],(num_sv,1)),sv_x).reshape((num_sv,1)))
+
+#y_predict = np.sum(_lambda*sv_y*gaussian_rbf(np.tile(arrX,(num_sv,1)),sv_x).reshape((num_sv,1)),axis=0).reshape((num_sv,1))
 
 b = np.sum(arrY-y_predict)
 b/=len(arrX)
 
-y_predict = np.zeros((test_m,1))
-for i in range(test_m):
-    y_predict[i] = np.sum(_lambda*sv_y*gaussian_rbf(np.tile(test_arrX[i],(num_sv,1)),sv_x).reshape((num_sv,1)))
+#y_predict = np.sum(_lambda*sv_y*gaussian_rbf(np.tile(test_arrX,(num_sv,1)),sv_x).reshape((num_sv,1)),axis=0).reshape((num_sv,1))
 
-w = y_predict + b
+w = testy_predict + b
 
 results = np.sign(w)
 results[results == 0] = 1
