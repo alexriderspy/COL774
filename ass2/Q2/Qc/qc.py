@@ -1,6 +1,6 @@
 from sklearn import svm
 import numpy as np
-import pickle,sys,os
+import pickle,sys,os,cvxopt
 
 train_path = str(sys.argv[1])
 test_path = str(sys.argv[2])
@@ -75,5 +75,30 @@ trainedsvm_gaussian = svm.SVC(kernel = 'rbf',gamma = 0.001).fit(arrX, arrY)
 
 score = trainedsvm_gaussian.score(test_arrX,test_arrY)
 support_vector_indices = trainedsvm_gaussian.support_
-print(len(support_vector_indices))
 print(score)
+
+C = 1.0
+
+gamma = 0.001
+
+X_norm = np.sum(arrX ** 2, axis = -1)
+K = np.exp(-gamma * (X_norm[:,None] + X_norm[None,:] - 2 * np.dot(arrX, arrX.T)))
+
+P = cvxopt.matrix(np.outer(arrY,arrY)  * K)
+q = cvxopt.matrix(-1 * np.ones(m)) # q has shape m*1
+G = cvxopt.matrix(np.concatenate((-1*np.identity(m), np.identity(m)), axis=0))
+h = cvxopt.matrix(np.concatenate((np.zeros(m), C*np.ones(m)), axis=0))
+A = cvxopt.matrix(1.0 * arrY, (1, m))
+b = cvxopt.matrix(0.0)
+# solve quadratic programming
+cvxopt.solvers.options['show_progress'] = False
+solution = cvxopt.solvers.qp(P, q, G, h, A, b)
+_lambda = np.ravel(solution['x'])
+
+#support vectors
+sv = np.bitwise_and(_lambda>1e-8, _lambda<=C)
+indices = np.arange(len(_lambda))[sv]
+num_sv = len(indices)
+
+print("Number of support vectors that match : ")
+print(len(np.intersect1d(np.ravel(indices),np.ravel(support_vector_indices))))

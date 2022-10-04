@@ -67,7 +67,6 @@ test_arrX/=255.0
 
 C = 1.0
 
-# compute inputs for cvxopt solver
 K = (arrX * arrY).T
 P = cvxopt.matrix(K.T.dot(K)) # P has shape m*m
 q = cvxopt.matrix(-1 * np.ones(m)) # q has shape m*1
@@ -75,7 +74,7 @@ G = cvxopt.matrix(np.concatenate((-1*np.identity(m), np.identity(m)), axis=0))
 h = cvxopt.matrix(np.concatenate((np.zeros(m), C*np.ones(m)), axis=0))
 A = cvxopt.matrix(1.0 * arrY, (1, m))
 b = cvxopt.matrix(0.0)
-# solve quadratic programming
+
 cvxopt.solvers.options['show_progress'] = False
 solution = cvxopt.solvers.qp(P, q, G, h, A, b)
 _lambda = np.ravel(solution['x']).reshape(m,1)
@@ -85,9 +84,11 @@ print('The number of support vectors are : ' + str(len(S)))
 print("Fraction of support vectors : " + str(len(S)/m))
 
 w = K[:, S].dot(_lambda[S])
+print(w)
 
 M = np.where((_lambda > 1e-8) & (_lambda < C))[0]
 b = np.mean(arrY[M] - arrX[M, :].dot(w))
+print(b)
 
 results = np.sign(test_arrX.dot(w) +b)
 results[results == 0] = 1
@@ -107,3 +108,8 @@ for i in range(len(array_images_top5)):
     img*=255.0
     img = img.reshape((32,32,3)).astype('uint8')
     plt.imsave('Image_linear_' + str(i)+ '.png',img)
+
+plt.xlabel('features')
+plt.ylabel('weight')
+plt.plot(np.arange(3072),w.T[0])
+plt.savefig('Plot of weight vs features')

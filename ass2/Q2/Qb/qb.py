@@ -84,7 +84,7 @@ h = cvxopt.matrix(np.concatenate((np.zeros(m), C*np.ones(m)), axis=0))
 A = cvxopt.matrix(1.0 * arrY, (1, m))
 b = cvxopt.matrix(0.0)
 # solve quadratic programming
-#cvxopt.solvers.options['show_progress'] = False
+cvxopt.solvers.options['show_progress'] = False
 solution = cvxopt.solvers.qp(P, q, G, h, A, b)
 _lambda = np.ravel(solution['x'])
 

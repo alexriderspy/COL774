@@ -14,7 +14,6 @@ with open(file, 'rb') as fo:
 
 labels = dict['labels']
 data = dict['data']
-
 data = (data*1.0)/255.0
 
 with open(test_file, 'rb') as fo:
@@ -40,7 +39,10 @@ test_arrX = np.multiply(test_arrX,1.0)
 
 test_arrX/=255.0
 
-final_array = np.zeros((len(test_arrX),5)).tolist()
+final_array = [0 for _ in range(test_m)]
+
+for i in range(test_m):
+  final_array[i] = [[0.0,0.0],[0.0,0.0],[0.0,0.0],[0.0,0.0],[0.0,0.0]]
 
 C = 1.0
 
@@ -77,7 +79,7 @@ for l0 in range(5):
         A = cvxopt.matrix(1.0 * arrY, (1, m))
         b = cvxopt.matrix(0.0)
         # solve quadratic programming
-        #cvxopt.solvers.options['show_progress'] = False
+        cvxopt.solvers.options['show_progress'] = False
         solution = cvxopt.solvers.qp(P, q, G, h, A, b)
         _lambda = np.ravel(solution['x'])
 
@@ -89,6 +91,7 @@ for l0 in range(5):
         sv_x = arrX[sv].reshape((num_sv,3072))
         sv_y = arrY[sv].reshape((num_sv,1))
 
+        #print(num_sv)
         mul = _lambda*sv_y
         sv_X_norm = np.sum(sv_x ** 2, axis = -1)
         K = np.exp(-gamma * (X_norm[:,None] + sv_X_norm[None,:] - 2 * np.dot(arrX, sv_x.T)))
@@ -104,22 +107,12 @@ for l0 in range(5):
         testy_predict = np.sum(mul * K.T,axis=0).reshape((test_m,1))
         w = testy_predict + b
 
-        score = np.sign(w)
-        score[score == 0] = 1
-
+        score = w
         for i in range(len(score)):
-            if (score[i]<0 and test_arrY[i]==l0):
-                if final_array[i][l0]==0:
-                    final_array[i][l0] = (1,abs(score[i]))
-                else:
-                    prev = final_array[i][l0][0]
-                    final_array[i][l0] = (prev+1,abs(final_array[i][l0][1])+abs(score[i]))
-            elif (score[i]>0 and test_arrY[i]==l1):
-                if final_array[i][l1]==0:
-                    final_array[i][l1] = (1,abs(score[i]))
-                else:
-                    prev = final_array[i][l1][0]
-                    final_array[i][l1] = (prev+1,abs(final_array[i][l1][1])+abs(score[i]))
+            if (score[i][0]<0):
+                final_array[i][l0] = [final_array[i][l0][0]+1,abs(final_array[i][l0][1])+abs(score[i][0])]
+            else:
+                final_array[i][l1] = [final_array[i][l1][0]+1,abs(final_array[i][l1][1])+abs(score[i][0])]
 
 def compare(x,y):
     if x[0] == y[0]:
@@ -129,15 +122,14 @@ def compare(x,y):
 
 accu = 0.0
 
-for i in range(len(test_arrX)):
-    get_scores = final_array[i]
+for i in range(test_m):
+    get_scores = [0,0,0,0,0]
     for j in range(len(get_scores)):
-        get_scores[j] = (final_array[i][j][0],final_array[i][j][1],j)
-    sorted(get_scores, key = cmp_to_key(compare))
-    y_pred = get_scores[-1][2]
-    if y_pred == test_arrY[i]:
+        get_scores[j] = [final_array[i][j][0],final_array[i][j][1],j]
+    get_scores = sorted(get_scores, key = cmp_to_key(compare))
+    y_pred = int(get_scores[-1][2])
+    if y_pred == labels[i]:
         accu += 1
 
-accu/=len(test_arrX)
+accu/=test_m
 print("Accuracy of test data : " + str(accu))
-
