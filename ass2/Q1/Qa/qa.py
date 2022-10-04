@@ -29,26 +29,26 @@ cnt_wrds_pos = 0
 cnt_wrds_neg = 0
 cnt_wrds = 0
 
-for (dirpath, dirnames, filenames) in os.walk(os.path.join(train_path,'/pos')):
+for (dirpath, dirnames, filenames) in os.walk(train_path + '/pos/'):
     for filename in filenames:
         cnt_pos +=1
-        my_files_pos.append(os.path.join(train_path,'/pos/',filename))
+        my_files_pos.append(train_path + '/pos/' + filename)
     break
 
-for (dirpath, dirnames, filenames) in os.walk(os.path.join(test_path,'/pos')):
+for (dirpath, dirnames, filenames) in os.walk(test_path + '/pos/'):
     for filename in filenames:
-        test_pos.append(os.path.join(test_path,'/pos/' ,filename))
+        test_pos.append(test_path+'/pos/' +filename)
     break
 
-for (dirpath, dirnames, filenames) in os.walk(os.path.join(train_path,'/neg')):
+for (dirpath, dirnames, filenames) in os.walk(train_path+'/neg/'):
     for filename in filenames:
         cnt_neg+=1
-        my_files_neg.append(os.path.join(train_path,'/neg/',filename))
+        my_files_neg.append(train_path+'/neg/'+filename)
     break
 
-for (dirpath, dirnames, filenames) in os.walk(os.path.join(test_path, '/neg')):
+for (dirpath, dirnames, filenames) in os.walk(test_path+'/neg/'):
     for filename in filenames:
-        test_neg.append(os.path.join(test_path,'/neg/' ,filename))
+        test_neg.append(test_path+'/neg/' +filename)
     break
 
 pos_prob = cnt_pos/(cnt_pos+cnt_neg)
@@ -100,13 +100,10 @@ for item0 in cnt_neg_lis:
     for c in str(cnt_neg_lis[item0]):
         output_neg += item0 + ' '
 
-stopwords = set()
-stopwords.add('br')
-
 wc_pos = WordCloud(
     background_color='white',
     max_words=2000,
-    stopwords=stopwords
+    stopwords=None
 )
 
 wc_pos.generate(output_pos)
@@ -122,7 +119,7 @@ fig.savefig('pos_wc.png')
 wc_neg = WordCloud(
     background_color='white',
     max_words=2000,
-    stopwords=stopwords
+    stopwords=None
 )
 
 wc_neg.generate(output_neg)

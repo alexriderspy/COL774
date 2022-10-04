@@ -66,7 +66,8 @@ test_accu = [0 for _ in range(5)]
 iter = 0
 for C in C_values:
     i=0
-    maxi = -10
+    maxi = -10.0
+    avg_val = 0.0
     trained = None
     while(i<length*5):
         valX = arrX[i:i+length]
@@ -80,13 +81,13 @@ for C in C_values:
         accu = np.sum(yhat == valY)
         accu/= len(valY)
 
+        avg_val += accu
         if accu>maxi:
             maxi = accu
             trained = model
         i+=length
     
-
-    val_accu[iter] = maxi
+    val_accu[iter] = avg_val/5
     yhat = trained.predict(test_arrX)
     accu = np.sum(yhat == test_arrY)
     accu /= len(test_arrY)

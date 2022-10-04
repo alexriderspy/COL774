@@ -70,8 +70,9 @@ C = 1.0
 gamma = 0.001
 
 def gaussian_rbf(X,Y):
+    X = np.ravel(X)
     global gamma
-    return np.exp(-gamma*(np.linalg.norm(X-Y, axis=1)**2))
+    return np.exp(-gamma*(np.linalg.norm(Y-X, axis=1)**2))
 
 X_norm = np.sum(arrX ** 2, axis = -1)
 K = np.exp(-gamma * (X_norm[:,None] + X_norm[None,:] - 2 * np.dot(arrX, arrX.T)))
@@ -104,17 +105,17 @@ print("Fraction of support vectors : " + str(num_sv/m))
 y_predict = np.zeros((m,1))
 testy_predict = np.zeros((test_m,1))
 
-for i in range(m):
-    y_predict[i] = np.sum(_lambda*sv_y*gaussian_rbf(np.tile(arrX[i],(num_sv,1)),sv_x).reshape((num_sv,1)))
-    if i<test_m:
-        testy_predict[i] = np.sum(_lambda*sv_y*gaussian_rbf(np.tile(test_arrX[i],(num_sv,1)),sv_x).reshape((num_sv,1)))
+mul = _lambda*sv_y
 
-#y_predict = np.sum(_lambda*sv_y*gaussian_rbf(np.tile(arrX,(num_sv,1)),sv_x).reshape((num_sv,1)),axis=0).reshape((num_sv,1))
+for i in range(m):
+    y_predict[i] = np.sum(mul*gaussian_rbf(arrX[i],sv_x).reshape((num_sv,1)))
+    if i<test_m:
+        testy_predict[i] = np.sum(mul*gaussian_rbf(test_arrX[i],sv_x).reshape((num_sv,1)))
 
 b = np.sum(arrY-y_predict)
 b/=len(arrX)
 
-#y_predict = np.sum(_lambda*sv_y*gaussian_rbf(np.tile(test_arrX,(num_sv,1)),sv_x).reshape((num_sv,1)),axis=0).reshape((num_sv,1))
+#testy_predict = np.sum(mul*gaussian_rbf(test_arrX,sv_x).reshape((num_sv,1)),axis=0).reshape((num_sv,1))
 
 w = testy_predict + b
 
@@ -125,16 +126,16 @@ score = (np.sum(results==test_arrY))/len(results)
 print('accuracy of test data : ' + str(score))
 
 _lambda = _wts_sv
+
+indices = np.arange(m).reshape((m,1))
+_lambda = np.append(_lambda,indices,axis=1)
 _lambda.sort()
 
-array_images_top5 = np.append(_lambda,arrX,axis=1)
-array_images_top5.sort()
-array_images_top5 = array_images_top5[-5:]
-array_images_top5 = np.delete(array_images_top5,0,1)
+array_images_top5 = _lambda[-5:]
 
 for i in range(len(array_images_top5)):
-    array_image = array_images_top5[i]
-    array_image*=255.0
-    array_image = array_image.reshape((32,32,3)).astype('uint8')
-    plt.imsave('Image_gaussian_' + str(i)+ '.png',array_image)
-    plt.imshow(array_image, interpolation='nearest')
+    array_image = array_images_top5[i][1]
+    img = arrX[int(array_image)]
+    img*=255.0
+    img = img.reshape((32,32,3)).astype('uint8')
+    plt.imsave('Image_gaussian_' + str(i)+ '.png',img)

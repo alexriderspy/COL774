@@ -92,25 +92,18 @@ b = np.mean(arrY[M] - arrX[M, :].dot(w))
 results = np.sign(test_arrX.dot(w) +b)
 results[results == 0] = 1
 
-accu = 0
-for i in range(len(results)):
-    if results[i]==test_arrY[i]:
-        accu += 1
-
-score = accu/len(results)
+score = (np.sum(results==test_arrY))/len(results)
 print('accuracy of test data : ' + str(score))
 
+indices = np.arange(m).reshape((m,1))
+_lambda = np.append(_lambda,indices,axis=1)
 _lambda.sort()
 
-array_images_top5 = np.append(_lambda,arrX,axis=1)
-array_images_top5.sort()
-array_images_top5 = array_images_top5[-5:]
-array_images_top5 = np.delete(array_images_top5,0,1)
+array_images_top5 = _lambda[-5:]
 
 for i in range(len(array_images_top5)):
-    array_image = array_images_top5[i]
-    
-    array_image = array_image.reshape((32,32,3))
-    
-    plt.imsave('Image_linear_' + str(i)+ '.png',array_image)
-    plt.imshow(array_image, interpolation='nearest')
+    array_image = array_images_top5[i][1]
+    img = arrX[int(array_image)]
+    img*=255.0
+    img = img.reshape((32,32,3)).astype('uint8')
+    plt.imsave('Image_linear_' + str(i)+ '.png',img)

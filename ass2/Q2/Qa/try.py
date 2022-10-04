@@ -54,3 +54,6 @@ print(gaussian_rbf(x,y))
 x=np.array([10,1,3])
 y=np.tile(x,(5,1))
 print(y)
+
+x=np.round(4.5)
+print(x)
