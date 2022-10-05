@@ -5,6 +5,9 @@ import numpy as np
 import sys,os,pickle
 from sklearn.metrics import confusion_matrix
 
+sys.path.append('../Qa')
+import qa
+
 train_path = str(sys.argv[1])
 test_path = str(sys.argv[2])
 
@@ -63,5 +66,10 @@ yhat = model.predict(test_arrX)
 
 cm = confusion_matrix(test_arrY,yhat)
 
-print("confusion matrix : ")
+print("confusion matrix for sklearn model: ")
+print(cm)
+
+cm = confusion_matrix(test_arrY,qa.yhat)
+
+print("confusion matrix for cvxopt model : ")
 print(cm)

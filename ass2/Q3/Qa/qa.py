@@ -121,6 +121,7 @@ def compare(x,y):
         return x[0] - y[0]
 
 accu = 0.0
+yhat = [0 for _ in range(test_m)]
 
 for i in range(test_m):
     get_scores = [0,0,0,0,0]
@@ -128,8 +129,9 @@ for i in range(test_m):
         get_scores[j] = [final_array[i][j][0],final_array[i][j][1],j]
     get_scores = sorted(get_scores, key = cmp_to_key(compare))
     y_pred = int(get_scores[-1][2])
-    if y_pred == labels[i]:
+    if y_pred == test_labels[i]:
         accu += 1
+    yhat[i] = y_pred
 
-accu/=test_m
+accu /= test_m
 print("Accuracy of test data : " + str(accu))

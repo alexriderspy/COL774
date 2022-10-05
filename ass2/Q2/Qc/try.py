@@ -52,3 +52,5 @@ y = np.array([[10,1,5],[5,5,7]])
 
 
 print(x[:,None])
+
+print(4.0 == 4)
