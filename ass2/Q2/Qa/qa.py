@@ -79,14 +79,14 @@ cvxopt.solvers.options['show_progress'] = False
 solution = cvxopt.solvers.qp(P, q, G, h, A, b)
 _lambda = np.ravel(solution['x']).reshape(m,1)
 
-S = np.where((_lambda > 1e-8) & (_lambda <= C))[0]
+S = np.where((_lambda > 1e-5) & (_lambda <= C))[0]
 print('The number of support vectors are : ' + str(len(S)))
 print("Fraction of support vectors : " + str(len(S)/m))
 
 w = K[:, S].dot(_lambda[S])
 print(w)
 
-M = np.where((_lambda > 1e-8) & (_lambda < C))[0]
+M = np.where((_lambda > 1e-5) & (_lambda < C))[0]
 b = np.mean(arrY[M] - arrX[M, :].dot(w))
 print(b)
 

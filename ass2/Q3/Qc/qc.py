@@ -1,12 +1,10 @@
 import numpy as np
-
+import cvxopt
 from sklearn.svm import SVC
-import numpy as np
 import sys,os,pickle
 from sklearn.metrics import confusion_matrix
-
-sys.path.append('../Qa')
-import qa
+import matplotlib.pyplot as plt
+from functools import cmp_to_key
 
 train_path = str(sys.argv[1])
 test_path = str(sys.argv[2])
@@ -19,6 +17,7 @@ with open(file, 'rb') as fo:
 
 labels = dict['labels']
 data = dict['data']
+data = (data*1.0)/255.0
 
 arrY = []
 arrX = []
@@ -34,8 +33,6 @@ arrX = np.array(arrX).reshape(m,3072)
 arrY = np.ravel(arrY)
 
 arrX = np.multiply(arrX,1.0)
-
-arrX/=255.0
 
 with open(test_file, 'rb') as fo:
     test_dict = pickle.load(fo, encoding='bytes')
@@ -69,7 +66,121 @@ cm = confusion_matrix(test_arrY,yhat)
 print("confusion matrix for sklearn model: ")
 print(cm)
 
-cm = confusion_matrix(test_arrY,qa.yhat)
+final_array = [0 for _ in range(test_m)]
+
+for i in range(test_m):
+  final_array[i] = [[0.0,0.0],[0.0,0.0],[0.0,0.0],[0.0,0.0],[0.0,0.0]]
+
+C = 1.0
+
+gamma = 0.001
+
+for l0 in range(5):
+    for l1 in range(l0+1,5):
+        arrY = []
+        arrX = []
+
+        #l0 -> -1, l1 -> 1
+        
+        for i in range(len(labels)):
+            if labels[i] == l0:
+                arrX.append(data[i].flatten())
+                arrY.append(-1)
+            elif labels[i]==l1:
+                arrX.append(data[i].flatten())
+                arrY.append(1)
+
+        m = len(arrX)
+        arrX = np.array(arrX).reshape(m,3072)
+        arrY = np.array(arrY).reshape(m,1)
+
+        X_norm = np.sum(arrX ** 2, axis = -1)
+        K = np.exp(-gamma * (X_norm[:,None] + X_norm[None,:] - 2 * np.dot(arrX, arrX.T)))
+
+        P = cvxopt.matrix(np.outer(arrY,arrY)  * K)
+        q = cvxopt.matrix(-1 * np.ones(m)) # q has shape m*1
+        G = cvxopt.matrix(np.concatenate((-1*np.identity(m), np.identity(m)), axis=0))
+        h = cvxopt.matrix(np.concatenate((np.zeros(m), C*np.ones(m)), axis=0))
+        A = cvxopt.matrix(1.0 * arrY, (1, m))
+        b = cvxopt.matrix(0.0)
+        # solve quadratic programming
+        cvxopt.solvers.options['show_progress'] = False
+        solution = cvxopt.solvers.qp(P, q, G, h, A, b)
+        _lambda = np.ravel(solution['x'])
+
+        #support vectors
+        sv = np.bitwise_and(_lambda>1e-8, _lambda<=C)
+        indices = np.arange(len(_lambda))[sv]
+        num_sv = len(indices)
+        _lambda = _lambda[sv].reshape((num_sv,1))
+        sv_x = arrX[sv].reshape((num_sv,3072))
+        sv_y = arrY[sv].reshape((num_sv,1))
+
+        #print(num_sv)
+        mul = _lambda*sv_y
+        sv_X_norm = np.sum(sv_x ** 2, axis = -1)
+        K = np.exp(-gamma * (X_norm[:,None] + sv_X_norm[None,:] - 2 * np.dot(arrX, sv_x.T)))
+
+        y_predict = np.sum(mul * K.T,axis=0).reshape((m,1))
+
+        b = np.sum(arrY-y_predict)
+        b/=len(arrX)
+
+        testX_norm = np.sum(test_arrX ** 2, axis = -1)
+        K = np.exp(-gamma * (testX_norm[:,None] + sv_X_norm[None,:] - 2 * np.dot(test_arrX, sv_x.T)))
+
+        testy_predict = np.sum(mul * K.T,axis=0).reshape((test_m,1))
+        w = testy_predict + b
+
+        score = w
+        for i in range(len(score)):
+            if (score[i][0]<0):
+                final_array[i][l0] = [final_array[i][l0][0]+1,abs(final_array[i][l0][1])+abs(score[i][0])]
+            else:
+                final_array[i][l1] = [final_array[i][l1][0]+1,abs(final_array[i][l1][1])+abs(score[i][0])]
+
+def compare(x,y):
+    if x[0] == y[0]:
+        return x[1] - y[1]
+    else:
+        return x[0] - y[0]
+
+accu = 0.0
+yhat = [0 for _ in range(test_m)]
+
+arr_mis_classified = []
+arr_actual_pred = []
+
+ctr = 0
+
+for i in range(test_m):
+    get_scores = [0,0,0,0,0]
+    for j in range(len(get_scores)):
+        get_scores[j] = [final_array[i][j][0],final_array[i][j][1],j]
+    get_scores = sorted(get_scores, key = cmp_to_key(compare))
+    y_pred = int(get_scores[-1][2])
+    yhat[i] = y_pred
+    if y_pred == test_labels[i]:
+        accu += 1
+    else:
+        if ctr >=10:
+            continue
+        arr_mis_classified.append(test_arrX[i])
+        arr_actual_pred.append([test_labels[i],y_pred])
+
+        ctr+=1
+
+accu /= test_m
+
+cm = confusion_matrix(test_arrY,yhat)
 
 print("confusion matrix for cvxopt model : ")
 print(cm)
+
+arr_mis = arr_mis_classified
+
+for i in range(len(arr_mis)):
+    img = arr_mis[i]
+    img*=255.0
+    img = img.reshape((32,32,3)).astype('uint8')
+    plt.imsave('Image_miss_' + str(i)+ '.png',img)

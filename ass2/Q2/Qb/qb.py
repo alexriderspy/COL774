@@ -91,7 +91,7 @@ _lambda = np.ravel(solution['x'])
 _wts_sv = _lambda.reshape((m,1))
 
 #support vectors
-sv = np.bitwise_and(_lambda>1e-8, _lambda<=C)
+sv = np.bitwise_and(_lambda>1e-5, _lambda<=C)
 indices = np.arange(len(_lambda))[sv]
 num_sv = len(indices)
 _lambda = _lambda[sv].reshape((num_sv,1))

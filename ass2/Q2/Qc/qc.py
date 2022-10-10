@@ -87,7 +87,7 @@ cvxopt.solvers.options['show_progress'] = False
 solution = cvxopt.solvers.qp(P, q, G, h, A, b)
 _lambda = np.ravel(solution['x']).reshape(m,1)
 
-S = np.where((_lambda > 1e-8) & (_lambda <= C))[0]
+S = np.where((_lambda > 1e-5) & (_lambda <= C))[0]
 
 print("Number of support vectors that match in linear kernel case: ")
 print(len(np.intersect1d(np.ravel(S),np.ravel(support_vector_indices))))
@@ -119,7 +119,7 @@ solution = cvxopt.solvers.qp(P, q, G, h, A, b)
 _lambda = np.ravel(solution['x'])
 
 #support vectors
-sv = np.bitwise_and(_lambda>1e-8, _lambda<=C)
+sv = np.bitwise_and(_lambda>1e-5, _lambda<=C)
 indices = np.arange(len(_lambda))[sv]
 num_sv = len(indices)
 

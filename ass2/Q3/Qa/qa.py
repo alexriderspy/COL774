@@ -123,6 +123,11 @@ def compare(x,y):
 accu = 0.0
 yhat = [0 for _ in range(test_m)]
 
+arr_mis_classified = []
+arr_actual_pred = []
+
+ctr = 0
+
 for i in range(test_m):
     get_scores = [0,0,0,0,0]
     for j in range(len(get_scores)):
@@ -131,6 +136,14 @@ for i in range(test_m):
     y_pred = int(get_scores[-1][2])
     if y_pred == test_labels[i]:
         accu += 1
+    else:
+        if ctr >=10:
+            continue
+        arr_mis_classified.append(test_arrX[i])
+        arr_actual_pred.append([test_labels[i],y_pred])
+
+        ctr+=1
+        
     yhat[i] = y_pred
 
 accu /= test_m
