@@ -52,7 +52,7 @@ val_arrX = np.delete(val_arrX,4,axis=1).astype('int')
 test_arrX = np.vectorize(f)(test_data)
 test_arrX = np.delete(test_arrX,4,axis=1).astype('int')
 
-parameters = {'max_depth':(3, 5, 8), 'min_samples_split': [4,5,6], 'min_samples_leaf': [4,5,6]}
+parameters = {'max_depth':[3, 5, 8], 'min_samples_split': [4,5,6], 'min_samples_leaf': [4,5,6]}
 
 clf = tree.DecisionTreeClassifier()
 tree_clf = GridSearchCV(estimator=clf, param_grid=parameters)

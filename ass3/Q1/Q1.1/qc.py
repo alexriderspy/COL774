@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from sklearn.tree import DecisionTreeClassifier
+from sklearn import tree
 import sys
 import numpy as np
 import pandas as pd
@@ -51,7 +51,7 @@ test_arrX = np.vectorize(f)(test_data)
 test_arrX = np.delete(test_arrX,4,axis=1).astype('int')
 
 
-clf = DecisionTreeClassifier(random_state=0)
+clf = tree.DecisionTreeClassifier(random_state=0)
 path = clf.cost_complexity_pruning_path(arrX, arrY)
 ccp_alphas, impurities = path.ccp_alphas, path.impurities
 
@@ -64,14 +64,9 @@ fig.savefig('Total Impurity vs effective alpha for training set.png')
 
 clfs = []
 for ccp_alpha in ccp_alphas:
-    clf = DecisionTreeClassifier(random_state=0, ccp_alpha=ccp_alpha)
+    clf = tree.DecisionTreeClassifier(random_state=0, ccp_alpha=ccp_alpha)
     clf.fit(arrX, arrY)
     clfs.append(clf)
-print(
-    "Number of nodes in the last tree is: {} with ccp_alpha: {}".format(
-        clfs[-1].tree_.node_count, ccp_alphas[-1]
-    )
-)
 
 clfs = clfs[:-1]
 ccp_alphas = ccp_alphas[:-1]
@@ -97,8 +92,33 @@ test_scores = [clf.score(test_arrX, test_arrY) for clf in clfs]
 fig, ax = plt.subplots()
 ax.set_xlabel("alpha")
 ax.set_ylabel("accuracy")
-ax.set_title("Accuracy vs alpha for training and testing sets")
+ax.set_title("Accuracy vs alpha for training, validation and test sets")
 ax.plot(ccp_alphas, train_scores, marker="o", label="train", drawstyle="steps-post")
 ax.plot(ccp_alphas, val_scores, marker="o", label="validation", drawstyle="steps-post")
+ax.plot(ccp_alphas, test_scores, marker="o", label="test", drawstyle="steps-post")
 ax.legend()
 fig.savefig('accuracy vs alpha.png')
+
+
+#best tree is one with highest validation accuracy 
+#ccp_alpha = 0.015
+
+clf = tree.DecisionTreeClassifier(ccp_alpha = 0.015)
+clf.fit(arrX,arrY)
+
+fig, axes = plt.subplots(nrows = 1,ncols = 1,figsize = (10,10), dpi=600)
+tree.plot_tree(clf,feature_names = features, class_names = class_names, filled=True, rounded = True)
+fig.savefig('q1.1c.png')
+
+
+ypred = clf.predict(arrX)
+train_acc = np.sum(ypred == arrY)/len(arrY)
+print("Training accuracy : " + str(train_acc))
+
+val_ypred = clf.predict(val_arrX)
+val_acc = np.sum(val_ypred == val_arrY)/len(val_arrY)
+print("Validation accuracy : " + str(val_acc))
+
+test_ypred = clf.predict(test_arrX)
+test_acc = np.sum(test_ypred == test_arrY)/len(test_arrY)
+print("Test accuracy : " + str(test_acc))
