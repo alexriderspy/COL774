@@ -2,71 +2,68 @@ import sys
 import pandas as pd
 import numpy as np
 from sklearn import tree
-import graphviz
-import matplotlib.pyplot as plt
-
+from sklearn.feature_extraction.text import CountVectorizer
+from scipy.sparse import hstack
 
 train_path = sys.argv[1]
 val_path = sys.argv[2]
 test_path = sys.argv[3]
 
 train_data = pd.read_csv(train_path+'/DrugsComTrain.csv')
-val_data = pd.read_csv(val_path + '/DrugsComVal.csv')
-test_data = pd.read_csv(test_path + '/DrugsComTest.csv')
 
-train_data[train_data == '?'] = np.nan
-train_data.dropna(inplace=True)
-val_data[val_data == '?'] = np.nan
-val_data.dropna(inplace=True)
-test_data[test_data == '?'] = np.nan
-test_data.dropna(inplace=True)
+y_train = train_data.rating
 
-features = list(train_data.columns)
+train_data.drop('rating', inplace=True, axis=1)
+train_data.drop('usefulCount', inplace=True, axis=1)
 
-features.remove('Severity')
-features.remove('BI-RADS assessment')
+vectorizer1 = CountVectorizer()
+X_train_condition = vectorizer1.fit_transform(train_data.condition.astype('U'))
+vectorizer2 = CountVectorizer()
+X_train_review = vectorizer2.fit_transform(train_data.review)
+vectorizer3 = CountVectorizer()
+X_train_date = vectorizer3.fit_transform(train_data.date)
 
-class_names = ['Benign','Malignant']
-train_data = train_data.to_numpy()
-val_data = val_data.to_numpy()
-test_data = test_data.to_numpy()
+X_train = hstack([X_train_condition, X_train_review, X_train_date])
+# X_test = vectorizer.transform(X_test)
 
-train_data = np.delete(train_data,0,axis = 1)
-val_data = np.delete(val_data,0,axis = 1)
-test_data = np.delete(test_data,0,axis = 1)
+dt = tree.DecisionTreeClassifier()
+dt.fit(X_train, y_train)
 
-def f(x):
-    return int(x)
-
-arrY = train_data[:,4].astype('int')
-
-val_arrY = val_data[:,4].astype('int')
-test_arrY = test_data[:,4].astype('int')
-
-arrX = np.vectorize(f)(train_data)
-arrX = np.delete(arrX,4,axis=1).astype('int')
-
-val_arrX = np.vectorize(f)(val_data)
-val_arrX = np.delete(val_arrX,4,axis=1).astype('int')
-
-test_arrX = np.vectorize(f)(test_data)
-test_arrX = np.delete(test_arrX,4,axis=1).astype('int')
-
-clf = tree.DecisionTreeClassifier()
-clf = clf.fit(arrX,arrY)
-
-# fig, axes = plt.subplots(nrows = 1,ncols = 1,figsize = (10,10), dpi=600)
-# tree.plot_tree(clf,feature_names = features, class_names = class_names, filled=True, rounded = True)
-# fig.savefig('q1.1a.png')
-
-ypred = clf.predict(arrX)
-train_acc = np.sum(ypred == arrY)/len(arrY)
+y_pred = dt.predict(X_train)
+train_acc = np.sum(y_pred == y_train)/len(y_train)
 print("Training accuracy : " + str(train_acc))
 
-val_ypred = clf.predict(val_arrX)
-val_acc = np.sum(val_ypred == val_arrY)/len(val_arrY)
+
+val_data = pd.read_csv(val_path + '/DrugsComVal.csv')
+
+y_val = val_data.rating
+
+val_data.drop('rating', inplace=True, axis=1)
+val_data.drop('usefulCount', inplace=True, axis=1)
+
+X_val_condition = vectorizer1.transform(val_data.condition.astype('U'))
+X_val_review = vectorizer2.transform(val_data.review)
+X_val_date = vectorizer3.transform(val_data.date)
+
+X_val = hstack([X_val_condition, X_val_review, X_val_date])
+
+y_val_pred = dt.predict(X_val)
+val_acc = np.sum(y_val_pred == y_val)/len(y_val)
 print("Validation accuracy : " + str(val_acc))
 
-test_ypred = clf.predict(test_arrX)
-test_acc = np.sum(test_ypred == test_arrY)/len(test_arrY)
+test_data = pd.read_csv(val_path + '/DrugsComTest.csv')
+
+y_test = test_data.rating
+
+test_data.drop('rating', inplace=True, axis=1)
+test_data.drop('usefulCount', inplace=True, axis=1)
+
+X_test_condition = vectorizer1.transform(test_data.condition.astype('U'))
+X_test_review = vectorizer2.transform(test_data.review)
+X_test_date = vectorizer3.transform(test_data.date)
+
+X_test = hstack([X_test_condition, X_test_review, X_test_date])
+
+y_test_pred = dt.predict(X_test)
+test_acc = np.sum(y_test_pred == y_test)/len(y_test)
 print("Test accuracy : " + str(test_acc))
