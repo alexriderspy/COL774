@@ -1,142 +1,79 @@
-from cgi import test
-from sklearn.impute import SimpleImputer
-
 import sys
 import pandas as pd
 import numpy as np
+import xgboost as xgb
 from sklearn import tree
-import matplotlib.pyplot as plt
+from sklearn.feature_extraction.text import CountVectorizer
+from scipy.sparse import hstack
 from sklearn.model_selection import GridSearchCV
 
 train_path = sys.argv[1]
 val_path = sys.argv[2]
 test_path = sys.argv[3]
 
-train_data_o = pd.read_csv(train_path+'/train.csv')
-val_data_o = pd.read_csv(val_path + '/val.csv')
-test_data_o = pd.read_csv(test_path + '/test.csv')
+train_data = pd.read_csv(train_path+'/DrugsComTrain.csv')
 
-train_data_o[train_data_o == '?'] = np.nan
+y_train = train_data.rating
 
-val_data_o[val_data_o == '?'] = np.nan
+train_data.drop('rating', inplace=True, axis=1)
+train_data.drop('usefulCount', inplace=True, axis=1)
 
-test_data_o[test_data_o == '?'] = np.nan
+vectorizer1 = CountVectorizer()
+X_train_condition = vectorizer1.fit_transform(train_data.condition.astype('U'))
+vectorizer2 = CountVectorizer()
+X_train_review = vectorizer2.fit_transform(train_data.review)
+vectorizer3 = CountVectorizer()
+X_train_date = vectorizer3.fit_transform(train_data.date)
 
+X_train = hstack([X_train_condition, X_train_review, X_train_date])
 
-features = list(train_data_o.columns)
+parameters = {'n_estimators': [350], 'subsample': [0.5], 'max_depth' : [50]}
 
-features.remove('Severity')
-features.remove('BI-RADS assessment')
+clf = xgb.XGBClassifier(objective="binary:logistic")
 
-class_names = ['Benign','Malignant']
-
-train_data = train_data_o
-val_data = val_data_o
-test_data = test_data_o
-
-imp_mean = SimpleImputer(missing_values= np.nan, strategy='mean')
-imp_mean.fit(train_data)
-
-train_data = imp_mean.transform(train_data)
-val_data = imp_mean.transform(val_data)
-test_data = imp_mean.transform(test_data)
-
-train_data = np.delete(train_data,0,axis = 1)
-val_data = np.delete(val_data,0,axis = 1)
-test_data = np.delete(test_data,0,axis = 1)
-
-def f(x):
-    return int(x)
-
-arrY = train_data[:,4].astype('int')
-
-val_arrY = val_data[:,4].astype('int')
-test_arrY = test_data[:,4].astype('int')
-
-arrX = np.vectorize(f)(train_data)
-arrX = np.delete(arrX,4,axis=1).astype('int')
-
-val_arrX = np.vectorize(f)(val_data)
-val_arrX = np.delete(val_arrX,4,axis=1).astype('int')
-
-test_arrX = np.vectorize(f)(test_data)
-test_arrX = np.delete(test_arrX,4,axis=1).astype('int')
-
-parameters = {'max_depth':[3], 'min_samples_split': [4,5,6], 'min_samples_leaf': [4,5,6]}
-
-clf = tree.DecisionTreeClassifier()
+y_train -= 1
 tree_clf = GridSearchCV(estimator=clf, param_grid=parameters)
-tree_clf = tree_clf.fit(arrX,arrY)
+tree_clf = tree_clf.fit(X_train,y_train)
 tree_clf=tree_clf.best_estimator_
-print("imputer strategy is mean")
 print(tree_clf)
 
-tree_clf = tree_clf.fit(arrX,arrY)
+tree_clf = tree_clf.fit(X_train,y_train)
 
-
-ypred = tree_clf.predict(arrX)
-train_acc = np.sum(ypred == arrY)/len(arrY)
+y_pred = tree_clf.predict(X_train)
+train_acc = np.sum(y_pred == y_train)/len(y_train)
 print("Training accuracy : " + str(train_acc))
 
-val_ypred = tree_clf.predict(val_arrX)
-val_acc = np.sum(val_ypred == val_arrY)/len(val_arrY)
+
+val_data = pd.read_csv(val_path + '/DrugsComVal.csv')
+
+y_val = val_data.rating
+
+val_data.drop('rating', inplace=True, axis=1)
+val_data.drop('usefulCount', inplace=True, axis=1)
+
+X_val_condition = vectorizer1.transform(val_data.condition.astype('U'))
+X_val_review = vectorizer2.transform(val_data.review)
+X_val_date = vectorizer3.transform(val_data.date)
+
+X_val = hstack([X_val_condition, X_val_review, X_val_date])
+
+y_val_pred = tree_clf.predict(X_val)
+val_acc = np.sum(y_val_pred == y_val)/len(y_val)
 print("Validation accuracy : " + str(val_acc))
 
-test_ypred = tree_clf.predict(test_arrX)
-test_acc = np.sum(test_ypred == test_arrY)/len(test_arrY)
-print("Test accuracy : " + str(test_acc))
+test_data = pd.read_csv(val_path + '/DrugsComTest.csv')
 
-train_data = train_data_o
-val_data = val_data_o
-test_data = test_data_o
+y_test = test_data.rating
 
-imp_median = SimpleImputer(missing_values= np.nan, strategy='median')
-imp_median.fit(train_data)
+test_data.drop('rating', inplace=True, axis=1)
+test_data.drop('usefulCount', inplace=True, axis=1)
 
-train_data = imp_median.transform(train_data)
-val_data = imp_median.transform(val_data)
-test_data = imp_median.transform(test_data)
+X_test_condition = vectorizer1.transform(test_data.condition.astype('U'))
+X_test_review = vectorizer2.transform(test_data.review)
+X_test_date = vectorizer3.transform(test_data.date)
 
-train_data = np.delete(train_data,0,axis = 1)
-val_data = np.delete(val_data,0,axis = 1)
-test_data = np.delete(test_data,0,axis = 1)
+X_test = hstack([X_test_condition, X_test_review, X_test_date])
 
-def f(x):
-    return int(x)
-
-arrY = train_data[:,4].astype('int')
-
-val_arrY = val_data[:,4].astype('int')
-test_arrY = test_data[:,4].astype('int')
-
-arrX = np.vectorize(f)(train_data)
-arrX = np.delete(arrX,4,axis=1).astype('int')
-
-val_arrX = np.vectorize(f)(val_data)
-val_arrX = np.delete(val_arrX,4,axis=1).astype('int')
-
-test_arrX = np.vectorize(f)(test_data)
-test_arrX = np.delete(test_arrX,4,axis=1).astype('int')
-
-parameters = {'max_depth':[3], 'min_samples_split': [4,5,6], 'min_samples_leaf': [4,5,6]}
-
-clf = tree.DecisionTreeClassifier()
-tree_clf = GridSearchCV(estimator=clf, param_grid=parameters)
-tree_clf = tree_clf.fit(arrX,arrY)
-tree_clf=tree_clf.best_estimator_
-print("imputer strategy is median")
-print(tree_clf)
-
-tree_clf = tree_clf.fit(arrX,arrY)
-
-ypred = tree_clf.predict(arrX)
-train_acc = np.sum(ypred == arrY)/len(arrY)
-print("Training accuracy : " + str(train_acc))
-
-val_ypred = tree_clf.predict(val_arrX)
-val_acc = np.sum(val_ypred == val_arrY)/len(val_arrY)
-print("Validation accuracy : " + str(val_acc))
-
-test_ypred = tree_clf.predict(test_arrX)
-test_acc = np.sum(test_ypred == test_arrY)/len(test_arrY)
+y_test_pred = tree_clf.predict(X_test)
+test_acc = np.sum(y_test_pred == y_test)/len(y_test)
 print("Test accuracy : " + str(test_acc))

@@ -1,8 +1,10 @@
 import sys
 import pandas as pd
 import numpy as np
+from sklearn import tree
+from sklearn.feature_extraction.text import CountVectorizer
+from scipy.sparse import hstack
 from sklearn import ensemble
-import graphviz
 import matplotlib.pyplot as plt
 from sklearn.model_selection import GridSearchCV
 
@@ -10,67 +12,67 @@ train_path = sys.argv[1]
 val_path = sys.argv[2]
 test_path = sys.argv[3]
 
-train_data = pd.read_csv(train_path+'/train.csv')
-val_data = pd.read_csv(val_path + '/val.csv')
-test_data = pd.read_csv(test_path + '/test.csv')
+train_data = pd.read_csv(train_path+'/DrugsComTrain.csv')
 
-train_data[train_data == '?'] = np.nan
-train_data.dropna(inplace=True)
-val_data[val_data == '?'] = np.nan
-val_data.dropna(inplace=True)
-test_data[test_data == '?'] = np.nan
-test_data.dropna(inplace=True)
+y_train = train_data.rating
 
-features = list(train_data.columns)
+train_data.drop('rating', inplace=True, axis=1)
+train_data.drop('usefulCount', inplace=True, axis=1)
 
-features.remove('Severity')
-features.remove('BI-RADS assessment')
+vectorizer1 = CountVectorizer()
+X_train_condition = vectorizer1.fit_transform(train_data.condition.astype('U'))
+vectorizer2 = CountVectorizer()
+X_train_review = vectorizer2.fit_transform(train_data.review)
+vectorizer3 = CountVectorizer()
+X_train_date = vectorizer3.fit_transform(train_data.date)
 
-class_names = ['Benign','Malignant']
-train_data = train_data.to_numpy()
-val_data = val_data.to_numpy()
-test_data = test_data.to_numpy()
+X_train = hstack([X_train_condition, X_train_review, X_train_date])
 
-train_data = np.delete(train_data,0,axis = 1)
-val_data = np.delete(val_data,0,axis = 1)
-test_data = np.delete(test_data,0,axis = 1)
-
-def f(x):
-    return int(x)
-
-arrY = train_data[:,4].astype('int')
-
-val_arrY = val_data[:,4].astype('int')
-test_arrY = test_data[:,4].astype('int')
-
-arrX = np.vectorize(f)(train_data)
-arrX = np.delete(arrX,4,axis=1).astype('int')
-
-val_arrX = np.vectorize(f)(val_data)
-val_arrX = np.delete(val_arrX,4,axis=1).astype('int')
-
-test_arrX = np.vectorize(f)(test_data)
-test_arrX = np.delete(test_arrX,4,axis=1).astype('int')
-
-parameters = {'max_features': [2,4,3], 'min_samples_split': [5,6,7], 'n_estimators': [90,100,120], 'oob_score': [True]}
+parameters = {'max_features': [0.6], 'min_samples_split': [5], 'n_estimators': [400], 'oob_score': [True]}
 
 clf = ensemble.RandomForestClassifier()
 tree_clf = GridSearchCV(estimator=clf, param_grid=parameters)
-tree_clf = tree_clf.fit(arrX,arrY)
+tree_clf = tree_clf.fit(X_train,y_train)
 tree_clf=tree_clf.best_estimator_
 print(tree_clf)
 
-tree_clf.fit(arrX,arrY)
+tree_clf.fit(X_train,y_train)
 
-ypred = tree_clf.predict(arrX)
-train_acc = np.sum(ypred == arrY)/len(arrY)
+y_pred = tree_clf.predict(X_train)
+train_acc = np.sum(y_pred == y_train)/len(y_train)
 print("Training accuracy : " + str(train_acc))
 
-print("Out of bag accuracy : " + str(tree_clf.oob_score_))
-val_ypred = tree_clf.predict(val_arrX)
-val_acc = np.sum(val_ypred == val_arrY)/len(val_arrY)
+
+val_data = pd.read_csv(val_path + '/DrugsComVal.csv')
+
+y_val = val_data.rating
+
+val_data.drop('rating', inplace=True, axis=1)
+val_data.drop('usefulCount', inplace=True, axis=1)
+
+X_val_condition = vectorizer1.transform(val_data.condition.astype('U'))
+X_val_review = vectorizer2.transform(val_data.review)
+X_val_date = vectorizer3.transform(val_data.date)
+
+X_val = hstack([X_val_condition, X_val_review, X_val_date])
+
+y_val_pred = tree_clf.predict(X_val)
+val_acc = np.sum(y_val_pred == y_val)/len(y_val)
 print("Validation accuracy : " + str(val_acc))
 
-test_ypred = tree_clf.predict(test_arrX)
-test_acc = np.sum(test_ypred == test_arrY)/len(test_arrY)
+test_data = pd.read_csv(val_path + '/DrugsComTest.csv')
+
+y_test = test_data.rating
+
+test_data.drop('rating', inplace=True, axis=1)
+test_data.drop('usefulCount', inplace=True, axis=1)
+
+X_test_condition = vectorizer1.transform(test_data.condition.astype('U'))
+X_test_review = vectorizer2.transform(test_data.review)
+X_test_date = vectorizer3.transform(test_data.date)
+
+X_test = hstack([X_test_condition, X_test_review, X_test_date])
+
+y_test_pred = tree_clf.predict(X_test)
+test_acc = np.sum(y_test_pred == y_test)/len(y_test)
 print("Test accuracy : " + str(test_acc))

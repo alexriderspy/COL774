@@ -2,7 +2,6 @@ import sys
 import pandas as pd
 import numpy as np
 from sklearn import ensemble
-import graphviz
 import matplotlib.pyplot as plt
 from sklearn.model_selection import GridSearchCV
 

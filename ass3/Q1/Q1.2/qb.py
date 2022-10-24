@@ -27,7 +27,7 @@ X_train_date = vectorizer3.fit_transform(train_data.date)
 X_train = hstack([X_train_condition, X_train_review, X_train_date])
 # X_test = vectorizer.transform(X_test)
 
-parameters = {'max_depth':[3, 5, 8], 'min_samples_split': [4,5,6], 'min_samples_leaf': [4,5,6]}
+parameters = {'max_depth':[400], 'min_samples_leaf': [8]}
 
 dt = tree.DecisionTreeClassifier()
 
