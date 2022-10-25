@@ -1,0 +1,16 @@
+Accuracy of train is 0.8764479407990133
+Accuracy of test is 0.847984798479848
+Accuracy of train is 0.8882981383023051
+Accuracy of test is 0.8568856885688569
+Accuracy of train is 0.8883481391356522
+Accuracy of test is 0.8543854385438544
+Accuracy of train is 0.8928815480258004
+Accuracy of test is 0.8531853185318532
+Accuracy of train is 0.7559125985433091
+Accuracy of test is 0.7466746674667467
+Accuracy of train is 0.5200920015333589
+Accuracy of test is 0.5159515951595159
+Accuracy of train is 0.2028533808896815
+Accuracy of test is 0.1994199419941994
+Accuracy of train is 0.10341839030650511
+Accuracy of test is 0.1000100010001

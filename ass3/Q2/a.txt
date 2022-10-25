@@ -1,0 +1,1 @@
+Accuracy of train is 0.7058950982516375Accuracy of test is 0.7017701770177017

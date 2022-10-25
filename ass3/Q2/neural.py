@@ -122,7 +122,7 @@ if q_part == 'a':
                 output = sigmoid(output)
             index = np.argmax(output)
             acc += (index == y_trueval[k])
-        out += ('Accuracy of train is ' + str(acc/m))
+        out += ('Accuracy of train is ' + str(acc/m)) + '\n'
 
         indices = []
         acc=0.0
@@ -136,7 +136,7 @@ if q_part == 'a':
             index = np.argmax(output)
             indices.append(index)
             acc += (index == y_test[k])
-        out += ('Accuracy of test is ' + str(acc/len(x_test)))
+        out += ('Accuracy of test is ' + str(acc/len(x_test))) + '\n'
     output_file = open(output_path + '/a.txt','w')
     output_file.write(out)
 elif q_part == 'b':
@@ -251,10 +251,8 @@ elif q_part == 'b':
                 output = sigmoid(output)
 
             index = np.argmax(output)
-            #out += (index)
-            #out += (y_true[k])
             acc += (index == y_trueval[k])
-        out += ('Accuracy of train is ' + str(acc/m))
+        out += ('Accuracy of train is ' + str(acc/m)) + '\n'
         train_accuracies.append(acc/m)
 
         indices = []
@@ -269,12 +267,12 @@ elif q_part == 'b':
             index = np.argmax(output)
             indices.append(index)
             acc += (index == y_test[k])
-        out += ('Accuracy of test is ' + str(acc/len(x_test)))
+        out += ('Accuracy of test is ' + str(acc/len(x_test))) + '\n'
         test_accuracies.append(acc/len(x_test))
         
         y_test = y_test.flatten()
         indices = np.array(indices)
-        out += (confusion_matrix(y_test,indices))
+        out += str(confusion_matrix(y_test,indices)) + '\n'
         
         times.append(time_taken)
 
@@ -402,10 +400,8 @@ elif q_part == 'c':
                 output = sigmoid(output)
 
             index = np.argmax(output)
-            #out += (index)
-            #out += (y_true[k])
             acc += (index == y_trueval[k])
-        out += ('Accuracy of train is ' + str(acc/m))
+        out += ('Accuracy of train is ' + str(acc/m)) + '\n'
         train_accuracies.append(acc/m)
 
         indices = []
@@ -420,12 +416,12 @@ elif q_part == 'c':
             index = np.argmax(output)
             indices.append(index)
             acc += (index == y_test[k])
-        out += ('Accuracy of test is ' + str(acc/len(x_test)))
+        out += ('Accuracy of test is ' + str(acc/len(x_test))) + '\n'
         test_accuracies.append(acc/len(x_test))
         
         y_test = y_test.flatten()
         indices = np.array(indices)
-        out += (confusion_matrix(y_test,indices))
+        out += str(confusion_matrix(y_test,indices)) + '\n'
         
         times.append(time_taken)
     plt.plot([5,10,15,20,25],train_accuracies)
@@ -564,7 +560,7 @@ elif q_part == 'd':
                     output = relu(output)
             index = np.argmax(output)
             acc += (index == y_trueval[k])
-        out += ('Accuracy of train is ' + str(acc/m))
+        out += ('Accuracy of train is ' + str(acc/m)) + '\n'
 
         indices = []
         acc=0.0
@@ -581,11 +577,11 @@ elif q_part == 'd':
             index = np.argmax(output)
             indices.append(index)
             acc += (index == y_test[k])
-        out += ('Accuracy of test is ' + str(acc/len(x_test)))
+        out += ('Accuracy of test is ' + str(acc/len(x_test))) + '\n'
         
         y_test = y_test.flatten()
         indices = np.array(indices)
-        out += (confusion_matrix(y_test,indices))
+        out += str(confusion_matrix(y_test,indices)) + '\n'
 
      
     import numpy as np
@@ -700,10 +696,8 @@ elif q_part == 'd':
                 output = np.dot(output, weights[i].T) + bias[i].T
                 output = sigmoid(output)
             index = np.argmax(output)
-            #out += (index)
-            #out += (y_true[k])
             acc += (index == y_trueval[k])
-        out += ('Accuracy of train is ' + str(acc/m))
+        out += ('Accuracy of train is ' + str(acc/m)) + '\n'
 
         indices = []
         acc=0.0
@@ -717,10 +711,10 @@ elif q_part == 'd':
             index = np.argmax(output)
             indices.append(index)
             acc += (index == y_test[k])
-        out += ('Accuracy of test is ' + str(acc/len(x_test)))
+        out += ('Accuracy of test is ' + str(acc/len(x_test))) + '\n'
         y_test = y_test.flatten()
         indices = np.array(indices)
-        out += (confusion_matrix(y_test,indices))
+        out += str(confusion_matrix(y_test,indices)) + '\n'
 
     output_file = open(output_path + '/d.txt','w')
     output_file.write(out)
@@ -846,10 +840,8 @@ elif q_part == 'e':
                 else:
                     output = relu(output)
             index = np.argmax(output)
-            #out += (index)
-            #out += (y_true[k])
             acc += (index == y_trueval[k])
-        out += ('Accuracy of train is ' + str(acc/m))
+        out += ('Accuracy of train is ' + str(acc/m)) + '\n'
         indices = []
         acc=0.0
         for k in range(len(x_test)):
@@ -865,7 +857,7 @@ elif q_part == 'e':
             index = np.argmax(output)
             indices.append(index)
             acc += (index == y_test[k])
-        out += ('Accuracy of test is ' + str(acc/len(x_test)))
+        out += ('Accuracy of test is ' + str(acc/len(x_test))) + '\n'
      
     import numpy as np
     import pandas as pd
@@ -980,10 +972,8 @@ elif q_part == 'e':
                 output = np.dot(output, weights[i].T) + bias[i].T
                 output = sigmoid(output)
             index = np.argmax(output)
-            #out += (index)
-            #out += (y_true[k])
             acc += (index == y_trueval[k])
-        out += ('Accuracy of train is ' + str(acc/m))
+        out += ('Accuracy of train is ' + str(acc/m)) + '\n'
         train_accuracies.append(acc/m)
 
         indices = []
@@ -998,7 +988,7 @@ elif q_part == 'e':
             index = np.argmax(output)
             indices.append(index)
             acc += (index == y_test[k])
-        out += ('Accuracy of test is ' + str(acc/len(x_test)))
+        out += ('Accuracy of test is ' + str(acc/len(x_test))) + '\n'
         test_accuracies.append(acc/len(x_test))
     plt.plot([2,3,4,5],train_accuracies)
     plt.xlabel('Hidden layers')
@@ -1019,9 +1009,6 @@ elif q_part == 'f':
     import matplotlib.pyplot as plt
     import time
     from sklearn.metrics import confusion_matrix
-
-    train_path = 'fmnist_train.csv'
-    test_path = 'fmnist_test.csv'
 
     train_data = pd.read_csv(train_path)
     test_data = pd.read_csv(test_path)
@@ -1117,7 +1104,7 @@ elif q_part == 'f':
                     weights[i] += rate*np.matmul(deltas[i].T,o_ls[i])/b
                     bias[i] += rate*np.sum(deltas[i],axis=0,keepdims=True).T/b
             final_result = np.sum(bce_derivs,axis=0)
-            out += (final_result)
+            out += str(final_result) + '\n'
             curr_cost/=(m/b)
         time_taken = time.time() - start_time
         acc = 0
@@ -1130,7 +1117,7 @@ elif q_part == 'f':
                 output = sigmoid(output)
             index = np.argmax(output)
             acc += (index == y_trueval[k])
-        out += ('Accuracy of train is ' + str(acc/m))
+        out += ('Accuracy of train is ' + str(acc/m)) + '\n'
 
         indices = []
         acc=0.0
@@ -1144,7 +1131,7 @@ elif q_part == 'f':
             index = np.argmax(output)
             indices.append(index)
             acc += (index == y_test[k])
-        out += ('Accuracy of test is ' + str(acc/len(x_test)))
+        out += ('Accuracy of test is ' + str(acc/len(x_test))) + '\n'
 
     output_file = open(output_path + '/f.txt','w')
     output_file.write(out)
@@ -1182,14 +1169,14 @@ elif q_part == 'g':
 
     clf = MLPClassifier(solver='sgd', max_iter=1000, learning_rate_init=0.1, activation='relu', hidden_layer_sizes=[50,50,50]).fit(x_train, y_train)
     acc_train = clf.score(x_train,y_train)
-    out += ("Training accuracy is " + str(acc_train))
+    out += ("Training accuracy is " + str(acc_train)) + '\n'
     acc_test = clf.score(x_test, y_test)
-    out += ("Test accuracy is " + str(acc_test))
+    out += ("Test accuracy is " + str(acc_test)) + '\n'
     output_file = open(output_path + '/g.txt','w')
     output_file.write(out)
 
 else:
-    out += 'wrong qpart'
+    out += 'wrong qpart' + '\n'
     output_file = open(output_path + '/w.txt','w')
     output_file.write(out)
 
