@@ -1,4 +1,4 @@
-import sys
+import sys,warnings
 
 train_path = str(sys.argv[1])
 test_path = str(sys.argv[2])
@@ -7,6 +7,7 @@ q_part = str(sys.argv[4])
 
 out = ''
 
+warnings.simplefilter(action='ignore')
 if q_part == 'a':
     
     import numpy as np
