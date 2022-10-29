@@ -1,4 +1,13 @@
 import sys,warnings
+import numpy as np
+import pandas as pd
+import random
+from keras.utils import np_utils
+import matplotlib.pyplot as plt
+import time
+from sklearn.metrics import confusion_matrix
+from sklearn.neural_network import MLPClassifier
+
 
 train_path = str(sys.argv[1])
 test_path = str(sys.argv[2])
@@ -9,15 +18,6 @@ out = ''
 
 warnings.simplefilter(action='ignore')
 if q_part == 'a':
-    
-    import numpy as np
-    import pandas as pd
-    import random
-    from keras.utils import np_utils
-    import matplotlib.pyplot as plt
-    import time
-    from sklearn.metrics import confusion_matrix
-
     train_data = pd.read_csv(train_path)
     test_data = pd.read_csv(test_path)
 
@@ -79,12 +79,13 @@ if q_part == 'a':
         bias = [np.random.randn(output_sizes[i],1)*(2/input_sizes[i])**0.5 for i in range(len(input_sizes))]
         prev_cost = 1e9
         curr_cost = 0
-        while (iter < num_iter) :
+        while (iter < num_iter) and abs(prev_cost - curr_cost) > 1e-9:
             prev_cost = curr_cost
             iter += 1
             rate = lr
             rate = lr/iter**0.5
             error = 0
+            curr_cost= 0
             for k in range(0,m,b):
                 x = x_train[k:k+b]
                 y_true = y_train[k:k+b]
@@ -112,44 +113,8 @@ if q_part == 'a':
                     bias[i] += rate*np.sum(deltas[i],axis=0,keepdims=True).T/b
             curr_cost/=(m/b)
             
-        time_taken = time.time() - start_time
-        acc = 0
-
-        for k in range(m):
-            output = x_train[k]
-            for i in range(len(hidden_layers)-1):
-                output = np.reshape(output, (1,-1))
-                output = np.dot(output, weights[i].T) + bias[i].T
-                output = sigmoid(output)
-            index = np.argmax(output)
-            acc += (index == y_trueval[k])
-        out += ('Accuracy of train is ' + str(acc/m)) + '\n'
-
-        indices = []
-        acc=0.0
-        for k in range(len(x_test)):
-            output = x_test[k]
-            for i in range(len(hidden_layers)-1):
-                output = np.reshape(output, (1,-1))
-                output = np.dot(output, weights[i].T) + bias[i].T
-                output = sigmoid(output)
-
-            index = np.argmax(output)
-            indices.append(index)
-            acc += (index == y_test[k])
-        out += ('Accuracy of test is ' + str(acc/len(x_test))) + '\n'
-    output_file = open(output_path + '/a.txt','w')
-    output_file.write(out)
 elif q_part == 'b':
      
-    import numpy as np
-    import pandas as pd
-    import random
-    from keras.utils import np_utils
-    import matplotlib.pyplot as plt
-    import time
-    from sklearn.metrics import confusion_matrix
-
     train_data = pd.read_csv(train_path)
     test_data = pd.read_csv(test_path)
 
@@ -208,11 +173,12 @@ elif q_part == 'b':
         bias = [np.random.randn(output_sizes[i],1)*(2/input_sizes[i])**0.5 for i in range(len(input_sizes))]
         prev_cost = 1e9
         curr_cost = 0
-        while (iter < num_iter) :
+        while (iter < num_iter) and abs(prev_cost - curr_cost) > 1e-9:
             prev_cost = curr_cost
             iter += 1
             rate = lr
             #rate = lr/iter**0.5
+            curr_cost= 0
             error = 0
             for k in range(0,m,b):
                 x = x_train[k:k+b]
@@ -277,28 +243,30 @@ elif q_part == 'b':
         
         times.append(time_taken)
 
+    plt.figure()
     plt.plot([5,10,15,20,25],train_accuracies)
     plt.xlabel('Hidden layers')
     plt.ylabel('Train accuracies')
+    plt.savefig(output_path + '/b_train_acc.png')
+
+    plt.figure()
     plt.xlabel('Hidden units')
     plt.ylabel('Test accuracies')
     plt.plot([5,10,15,20,25],test_accuracies)
+    plt.savefig(output_path + '/b_test_acc.png')
+
+    plt.figure()
     plt.xlabel('Hidden layers')
     plt.ylabel('Times taken')
     plt.plot([5,10,15,20,25],times)
+    plt.savefig(output_path + '/b_time.png')
+
+
     output_file = open(output_path + '/b.txt','w')
     output_file.write(out)
 
 elif q_part == 'c':
-     
-    import numpy as np
-    import pandas as pd
-    import random
-    from keras.utils import np_utils
-    import matplotlib.pyplot as plt
-    import time
-    from sklearn.metrics import confusion_matrix
-
+    
     train_data = pd.read_csv(train_path)
     test_data = pd.read_csv(test_path)
 
@@ -357,11 +325,12 @@ elif q_part == 'c':
         bias = [np.random.randn(output_sizes[i],1)*(2/input_sizes[i])**0.5 for i in range(len(input_sizes))]
         prev_cost = 1e9
         curr_cost = 0
-        while (iter < num_iter) :
+        while (iter < num_iter) and abs(prev_cost - curr_cost) > 1e-9 :
             prev_cost = curr_cost
             iter += 1
             rate = lr
             rate = lr/iter**0.5
+            curr_cost= 0
             error = 0
             for k in range(0,m,b):
                 x = x_train[k:k+b]
@@ -425,29 +394,30 @@ elif q_part == 'c':
         out += str(confusion_matrix(y_test,indices)) + '\n'
         
         times.append(time_taken)
+
+    plt.figure()
     plt.plot([5,10,15,20,25],train_accuracies)
     plt.xlabel('Hidden layers')
     plt.ylabel('Train accuracies')
-    plt.xlabel('Hidden layers')
+    plt.savefig(output_path + '/b_train_acc.png')
+
+    plt.figure()
+    plt.xlabel('Hidden units')
     plt.ylabel('Test accuracies')
     plt.plot([5,10,15,20,25],test_accuracies)
+    plt.savefig(output_path + '/b_test_acc.png')
+
+    plt.figure()
     plt.xlabel('Hidden layers')
     plt.ylabel('Times taken')
     plt.plot([5,10,15,20,25],times)
+    plt.savefig(output_path + '/b_time.png')
 
     output_file = open(output_path + '/c.txt','w')
     output_file.write(out)
 
 elif q_part == 'd':
      
-    import numpy as np
-    import pandas as pd
-    import random
-    from keras.utils import np_utils
-    import matplotlib.pyplot as plt
-    import time
-    from sklearn.metrics import confusion_matrix
-
     train_data = pd.read_csv(train_path)
     test_data = pd.read_csv(test_path)
 
@@ -510,11 +480,12 @@ elif q_part == 'd':
         bias = [np.random.randn(output_sizes[i],1)*(2/input_sizes[i])**0.5 for i in range(len(input_sizes))]
         prev_cost = 1e9
         curr_cost = 0
-        while (iter < num_iter) :
+        while (iter < num_iter) and abs(prev_cost - curr_cost) > 1e-9:
             prev_cost = curr_cost
             iter += 1
             rate = lr
             rate = lr/iter**0.5
+            curr_cost= 0
             error = 0
             for k in range(0,m,b):
                 x = x_train[k:k+b]
@@ -585,14 +556,6 @@ elif q_part == 'd':
         out += str(confusion_matrix(y_test,indices)) + '\n'
 
      
-    import numpy as np
-    import pandas as pd
-    import random
-    from keras.utils import np_utils
-    import matplotlib.pyplot as plt
-    import time
-    from sklearn.metrics import confusion_matrix
-
     train_data = pd.read_csv(train_path)
     test_data = pd.read_csv(test_path)
 
@@ -654,11 +617,12 @@ elif q_part == 'd':
         bias = [np.random.randn(output_sizes[i],1)*(2/input_sizes[i])**0.5 for i in range(len(input_sizes))]
         prev_cost = 1e9
         curr_cost = 0
-        while (iter < num_iter) :
+        while (iter < num_iter) and abs(prev_cost - curr_cost) > 1e-9:
             prev_cost = curr_cost
             iter += 1
             rate = lr
             rate = lr/iter**0.5
+            curr_cost= 0
             error = 0
             for k in range(0,m,b):
                 x = x_train[k:k+b]
@@ -722,14 +686,6 @@ elif q_part == 'd':
 
 elif q_part == 'e':
      
-    import numpy as np
-    import pandas as pd
-    import random
-    from keras.utils import np_utils
-    import matplotlib.pyplot as plt
-    import time
-    from sklearn.metrics import confusion_matrix
-
     train_data = pd.read_csv(train_path)
     test_data = pd.read_csv(test_path)
 
@@ -792,11 +748,12 @@ elif q_part == 'e':
         bias = [np.random.randn(output_sizes[i],1)*(2/input_sizes[i])**0.5 for i in range(len(input_sizes))]
         prev_cost = 1e9
         curr_cost = 0
-        while (iter < num_iter) :
+        while (iter < num_iter) and abs(prev_cost - curr_cost) > 1e-9 :
             prev_cost = curr_cost
             iter += 1
             rate = lr
             #rate = lr/iter**0.5
+            curr_cost= 0
             error = 0
             for k in range(0,m,b):
                 x = x_train[k:k+b]
@@ -860,14 +817,6 @@ elif q_part == 'e':
             acc += (index == y_test[k])
         out += ('Accuracy of test is ' + str(acc/len(x_test))) + '\n'
      
-    import numpy as np
-    import pandas as pd
-    import random
-    from keras.utils import np_utils
-    import matplotlib.pyplot as plt
-    import time
-    from sklearn.metrics import confusion_matrix
-
     train_data = pd.read_csv(train_path)
     test_data = pd.read_csv(test_path)
 
@@ -930,11 +879,12 @@ elif q_part == 'e':
         bias = [np.random.randn(output_sizes[i],1)*(2/input_sizes[i])**0.5 for i in range(len(input_sizes))]
         prev_cost = 1e9
         curr_cost = 0
-        while (iter < num_iter) :
+        while (iter < num_iter) and abs(prev_cost - curr_cost) > 1e-9:
             prev_cost = curr_cost
             iter += 1
             rate = lr
             #rate = lr/iter**0.5
+            curr_cost= 0
             error = 0
             for k in range(0,m,b):
                 x = x_train[k:k+b]
@@ -1003,14 +953,6 @@ elif q_part == 'e':
 
 elif q_part == 'f':
      
-    import numpy as np
-    import pandas as pd
-    import random
-    from keras.utils import np_utils
-    import matplotlib.pyplot as plt
-    import time
-    from sklearn.metrics import confusion_matrix
-
     train_data = pd.read_csv(train_path)
     test_data = pd.read_csv(test_path)
 
@@ -1069,11 +1011,12 @@ elif q_part == 'f':
         bias = [np.random.randn(output_sizes[i],1)*(2/input_sizes[i])**0.5 for i in range(len(input_sizes))]
         prev_cost = 1e9
         curr_cost = 0
-        while (iter < num_iter) :
+        while (iter < num_iter) and abs(prev_cost - curr_cost) > 1e-9:
             prev_cost = curr_cost
             iter += 1
             rate = lr
             #rate = lr/iter**0.5
+            curr_cost= 0
             error = 0
             bce_derivs = []
             for k in range(0,m,b):
@@ -1139,14 +1082,6 @@ elif q_part == 'f':
 
 elif q_part == 'g':
      
-    import numpy as np
-    import pandas as pd
-    import random
-    from keras.utils import np_utils
-    import matplotlib.pyplot as plt
-    import time
-    from sklearn.neural_network import MLPClassifier
-
     train_data = pd.read_csv(train_path)
     test_data = pd.read_csv(test_path)
 

@@ -369,7 +369,7 @@ elif q_part == 'e':
 
     X_train = hstack([X_train_condition, X_train_review, X_train_date,X_train_usefulCount])
     # X_test = vectorizer.transform(X_test)
-    parameters = {'max_depth': np.arange(40,70,10), 'subsample': np.arange(0.4,0.8,0.1), 'n_estimators': np.arange(50,450,50), 'oob_score': [True]}
+    parameters = {'max_depth': np.arange(40,70,10), 'subsample': np.arange(0.4,0.8,0.1), 'n_estimators': np.arange(50,450,50)}
 
     dt = xgb.XGBClassifier(objective="binary:logistic")
 
@@ -429,25 +429,26 @@ elif q_part == 'f':
     train_data = pd.read_csv(train_path)
 
     y_train = train_data.rating
-    y_train -= 1
+    y_train -= 1.0
     train_data.drop('rating', inplace=True, axis=1)
 
-    vectorizer1 = CountVectorizer()
+    vectorizer1 = CountVectorizer(dtype = np.float64)
     X_train_condition = vectorizer1.fit_transform(train_data.condition.astype('U'))
-    vectorizer2 = CountVectorizer()
+    vectorizer2 = CountVectorizer(dtype = np.float64)
     X_train_review = vectorizer2.fit_transform(train_data.review)
-    vectorizer3 = CountVectorizer()
+    vectorizer3 = CountVectorizer(dtype = np.float64)
     X_train_date = vectorizer3.fit_transform(train_data.date)
-    vectorizer4 = CountVectorizer()
+    vectorizer4 = CountVectorizer(dtype = np.float64)
     X_train_usefulCount = vectorizer4.fit_transform(train_data.usefulCount.astype('U'))
 
     X_train = hstack([X_train_condition, X_train_review, X_train_date,X_train_usefulCount])
-    # X_test = vectorizer.transform(X_test)
-    parameters = {'max_depth':[40,100,200,500], 'min_samples_split':[1,2,3,4,5,6], 'min_samples_leaf':[1,2,3,4,5,6]}
+    
+    parameters = {'max_depth': np.arange(40,500,10), 'subsample': np.arange(0.4,2.0,0.1), 'n_estimators': np.arange(50,2000,50)}
 
-    clf = lgb.LGBMClassifier()
+    dt = lgb.LGBMClassifier()
+    clf = GridSearchCV(dt, param_grid = parameters)
     clf.fit(X_train,y_train)
-
+    out += str(clf) + '\n'
     y_pred = clf.predict(X_train)
     train_acc = np.sum(y_pred == y_train)/len(y_train)
     out += ("Training accuracy : " + str(train_acc)) + '\n'
@@ -456,7 +457,7 @@ elif q_part == 'f':
     val_data = pd.read_csv(val_path)
 
     y_val = val_data.rating
-    y_val -= 1
+    y_val -= 1.0
     val_data.drop('rating', inplace=True, axis=1)
 
     X_val_condition = vectorizer1.transform(val_data.condition.astype('U'))
@@ -472,7 +473,7 @@ elif q_part == 'f':
 
     test_data = pd.read_csv(test_path)
     y_test = test_data.rating
-    y_test -= 1
+    y_test -= 1.0
     test_data.drop('rating', inplace=True, axis=1)
 
     X_test_condition = vectorizer1.transform(test_data.condition.astype('U'))
@@ -493,7 +494,22 @@ elif q_part == 'g':
 
     train_data_o = pd.read_csv(train_path)
 
+    
     for num_samples in [20000,40000,60000,80000,100000,120000,140000,160000]:
+        train_accuracies_grid = []
+        test_accuracies_grid = []
+
+        train_accuracies_ccp = []
+        test_accuracies_ccp = []
+
+        train_accuracies_rf = []
+        test_accuracies_rf = []
+
+        train_accuracies_xgb = []
+        test_accuracies_xgb = []
+
+        train_accuracies_lgb = []
+        test_accuracies_lgb = []
 
         out += ("Number of samples: " + str(num_samples)) + '\n'
         train_data = train_data_o.sample(replace=True, random_state=1, n=num_samples)
@@ -528,25 +544,7 @@ elif q_part == 'g':
 
         y_pred = clf.predict(X_train)
         train_acc = np.sum(y_pred == y_train)/len(y_train)
-        out += ("Training accuracy : " + str(train_acc)) + '\n'
-
-
-        val_data = pd.read_csv(val_path)
-
-        y_val = val_data.rating
-
-        val_data.drop('rating', inplace=True, axis=1)
-
-        X_val_condition = vectorizer1.transform(val_data.condition.astype('U'))
-        X_val_review = vectorizer2.transform(val_data.review)
-        X_val_date = vectorizer3.transform(val_data.date)
-        X_val_usefulCount = vectorizer4.transform(val_data.usefulCount.astype('U'))
-
-        X_val = hstack([X_val_condition, X_val_review, X_val_date,X_val_usefulCount])
-
-        y_val_pred = clf.predict(X_val)
-        val_acc = np.sum(y_val_pred == y_val)/len(y_val)
-        out += ("Validation accuracy : " + str(val_acc)) + '\n'
+        train_accuracies_grid.append(train_acc)
 
         test_data = pd.read_csv(test_path)
         y_test = test_data.rating
@@ -562,7 +560,7 @@ elif q_part == 'g':
 
         y_test_pred = clf.predict(X_test)
         test_acc = np.sum(y_test_pred == y_test)/len(y_test)
-        out += ("Test accuracy : " + str(test_acc)) + '\n'
+        test_accuracies_grid.append(test_acc)
 
         out += ("CCP Alphas") + '\n'
         parameters = {'max_depth':[40,100,200,500], 'min_samples_split':[1,2,3,4,5,6], 'min_samples_leaf':[1,2,3,4,5,6]}
@@ -625,25 +623,7 @@ elif q_part == 'g':
 
         y_pred = clf.predict(X_train)
         train_acc = np.sum(y_pred == y_train)/len(y_train)
-        out += ("Training accuracy : " + str(train_acc)) + '\n'
-
-
-        val_data = pd.read_csv(val_path)
-
-        y_val = val_data.rating
-
-        val_data.drop('rating', inplace=True, axis=1)
-
-        X_val_condition = vectorizer1.transform(val_data.condition.astype('U'))
-        X_val_review = vectorizer2.transform(val_data.review)
-        X_val_date = vectorizer3.transform(val_data.date)
-        X_val_usefulCount = vectorizer4.transform(val_data.usefulCount.astype('U'))
-
-        X_val = hstack([X_val_condition, X_val_review, X_val_date,X_val_usefulCount])
-
-        y_val_pred = clf.predict(X_val)
-        val_acc = np.sum(y_val_pred == y_val)/len(y_val)
-        out += ("Validation accuracy : " + str(val_acc)) + '\n'
+        train_accuracies_ccp.append(train_acc)
 
         test_data = pd.read_csv(test_path)
         y_test = test_data.rating
@@ -659,7 +639,7 @@ elif q_part == 'g':
 
         y_test_pred = clf.predict(X_test)
         test_acc = np.sum(y_test_pred == y_test)/len(y_test)
-        out += ("Test accuracy : " + str(test_acc)) + '\n'
+        test_accuracies_ccp.append(test_acc)
 
         out += ("Random Forest") + '\n'
         parameters = {'max_features': np.arange(0.4,1.0,0.1), 'min_samples_split': np.arange(2,10,2), 'n_estimators': np.arange(50,460,50), 'oob_score': [True]}
@@ -676,26 +656,7 @@ elif q_part == 'g':
 
         y_pred = clf.predict(X_train)
         train_acc = np.sum(y_pred == y_train)/len(y_train)
-        out += ("Training accuracy : " + str(train_acc)) + '\n'
-
-        out += "Out of bag accuracy : " + str(clf.oob_score_) + '\n'
-
-        val_data = pd.read_csv(val_path)
-
-        y_val = val_data.rating
-
-        val_data.drop('rating', inplace=True, axis=1)
-
-        X_val_condition = vectorizer1.transform(val_data.condition.astype('U'))
-        X_val_review = vectorizer2.transform(val_data.review)
-        X_val_date = vectorizer3.transform(val_data.date)
-        X_val_usefulCount = vectorizer4.transform(val_data.usefulCount.astype('U'))
-
-        X_val = hstack([X_val_condition, X_val_review, X_val_date,X_val_usefulCount])
-
-        y_val_pred = clf.predict(X_val)
-        val_acc = np.sum(y_val_pred == y_val)/len(y_val)
-        out += ("Validation accuracy : " + str(val_acc)) + '\n'
+        train_accuracies_rf.append(train_acc)
 
         test_data = pd.read_csv(test_path)
         y_test = test_data.rating
@@ -711,7 +672,7 @@ elif q_part == 'g':
 
         y_test_pred = clf.predict(X_test)
         test_acc = np.sum(y_test_pred == y_test)/len(y_test)
-        out += ("Test accuracy : " + str(test_acc)) + '\n'
+        test_accuracies_rf.append(test_acc)
 
         out += ("XGBoost") + '\n'
         parameters = {'max_depth': np.arange(40,70,10), 'subsample': np.arange(0.4,0.8,0.1), 'n_estimators': np.arange(50,450,50), 'oob_score': [True]}
@@ -730,25 +691,8 @@ elif q_part == 'g':
 
         y_pred = clf.predict(X_train)
         train_acc = np.sum(y_pred == y_train)/len(y_train)
-        out += ("Training accuracy : " + str(train_acc)) + '\n'
+        train_accuracies_xgb.append(train_acc)
 
-
-        val_data = pd.read_csv(val_path)
-
-        y_val = val_data.rating
-        y_val -= 1
-        val_data.drop('rating', inplace=True, axis=1)
-
-        X_val_condition = vectorizer1.transform(val_data.condition.astype('U'))
-        X_val_review = vectorizer2.transform(val_data.review)
-        X_val_date = vectorizer3.transform(val_data.date)
-        X_val_usefulCount = vectorizer4.transform(val_data.usefulCount.astype('U'))
-
-        X_val = hstack([X_val_condition, X_val_review, X_val_date,X_val_usefulCount])
-
-        y_val_pred = clf.predict(X_val)
-        val_acc = np.sum(y_val_pred == y_val)/len(y_val)
-        out += ("Validation accuracy : " + str(val_acc)) + '\n'
 
         test_data = pd.read_csv(test_path)
         y_test = test_data.rating
@@ -764,7 +708,7 @@ elif q_part == 'g':
 
         y_test_pred = clf.predict(X_test)
         test_acc = np.sum(y_test_pred == y_test)/len(y_test)
-        out += ("Test accuracy : " + str(test_acc)) + '\n'
+        test_accuracies_xgb.append(test_acc)
 
         out += ("LightGBM") + '\n'
 
@@ -775,25 +719,7 @@ elif q_part == 'g':
 
         y_pred = clf.predict(X_train)
         train_acc = np.sum(y_pred == y_train)/len(y_train)
-        out += ("Training accuracy : " + str(train_acc)) + '\n'
-
-
-        val_data = pd.read_csv(val_path)
-
-        y_val = val_data.rating
-        y_val -= 1
-        val_data.drop('rating', inplace=True, axis=1)
-
-        X_val_condition = vectorizer1.transform(val_data.condition.astype('U'))
-        X_val_review = vectorizer2.transform(val_data.review)
-        X_val_date = vectorizer3.transform(val_data.date)
-        X_val_usefulCount = vectorizer4.transform(val_data.usefulCount.astype('U'))
-
-        X_val = hstack([X_val_condition, X_val_review, X_val_date,X_val_usefulCount])
-
-        y_val_pred = clf.predict(X_val)
-        val_acc = np.sum(y_val_pred == y_val)/len(y_val)
-        out += ("Validation accuracy : " + str(val_acc)) + '\n'
+        train_accuracies_lgb.append(train_acc)
 
         test_data = pd.read_csv(test_path)
         y_test = test_data.rating
@@ -809,7 +735,47 @@ elif q_part == 'g':
 
         y_test_pred = clf.predict(X_test)
         test_acc = np.sum(y_test_pred == y_test)/len(y_test)
-        out += ("Test accuracy : " + str(test_acc)) + '\n'
+        test_accuracies_lgb.append(test_acc)
+
+    plt.figure()
+    plt.plot([20000,40000,60000,80000,100000,120000,140000,160000],train_accuracies_grid)
+    plt.savefig(output_path + '/grid_train.png')
+    
+    plt.figure()
+    plt.plot([20000,40000,60000,80000,100000,120000,140000,160000],train_accuracies_ccp)
+    plt.savefig(output_path + '/ccp_train.png')
+    
+    plt.figure()
+    plt.plot([20000,40000,60000,80000,100000,120000,140000,160000],train_accuracies_rf)
+    plt.savefig(output_path + '/rf_train.png')
+    
+    plt.figure()
+    plt.plot([20000,40000,60000,80000,100000,120000,140000,160000],train_accuracies_xgb)
+    plt.savefig(output_path + '/xgb_train.png')
+
+    plt.figure()
+    plt.plot([20000,40000,60000,80000,100000,120000,140000,160000],train_accuracies_lgb)
+    plt.savefig(output_path + '/lgb_train.png')
+    
+    plt.figure()
+    plt.plot([20000,40000,60000,80000,100000,120000,140000,160000],test_accuracies_grid)
+    plt.savefig(output_path + '/grid_test.png')
+    
+    plt.figure()
+    plt.plot([20000,40000,60000,80000,100000,120000,140000,160000],test_accuracies_ccp)
+    plt.savefig(output_path + '/ccp_test.png')
+    
+    plt.figure()
+    plt.plot([20000,40000,60000,80000,100000,120000,140000,160000],test_accuracies_rf)
+    plt.savefig(output_path + '/rf_test.png')
+    
+    plt.figure()
+    plt.plot([20000,40000,60000,80000,100000,120000,140000,160000],test_accuracies_xgb)
+    plt.savefig(output_path + '/xgb_test.png')
+
+    plt.figure()
+    plt.plot([20000,40000,60000,80000,100000,120000,140000,160000],test_accuracies_lgb)
+    plt.savefig(output_path + '/lgb_test.png')
 
     output_file = open(output_path + '/2_g.txt','w')
     output_file.write(out)
