@@ -704,6 +704,9 @@ elif q_part == 'e':
     test_acc = np.sum(test_ypred == test_arrY)/len(test_arrY)
     out += "Test accuracy : " + str(test_acc) + '\n'
 
+    output_file = open(output_path + '/1_e.txt','w')
+    output_file.write(out)
+
 elif q_part == 'f':
     train_data[train_data == '?'] = np.nan
 
@@ -769,4 +772,4 @@ elif q_part == 'f':
     output_file = open(output_path + '/1_f.txt','w')
     output_file.write(out)
 
-output_file.close()
+

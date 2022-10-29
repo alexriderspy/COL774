@@ -399,19 +399,19 @@ elif q_part == 'c':
     plt.plot([5,10,15,20,25],train_accuracies)
     plt.xlabel('Hidden layers')
     plt.ylabel('Train accuracies')
-    plt.savefig(output_path + '/b_train_acc.png')
+    plt.savefig(output_path + '/c_train_acc.png')
 
     plt.figure()
     plt.xlabel('Hidden units')
     plt.ylabel('Test accuracies')
     plt.plot([5,10,15,20,25],test_accuracies)
-    plt.savefig(output_path + '/b_test_acc.png')
+    plt.savefig(output_path + '/c_test_acc.png')
 
     plt.figure()
     plt.xlabel('Hidden layers')
     plt.ylabel('Times taken')
     plt.plot([5,10,15,20,25],times)
-    plt.savefig(output_path + '/b_time.png')
+    plt.savefig(output_path + '/c_time.png')
 
     output_file = open(output_path + '/c.txt','w')
     output_file.write(out)
@@ -738,6 +738,9 @@ elif q_part == 'e':
     def relu_prime(z):
         return 1. * (z > 0)
 
+    train_accuracies = []
+    test_accuracies = []
+
     for hidden_layers in   (hidden_layers_list):
         start_time = time.time()
         iter = 0
@@ -800,6 +803,7 @@ elif q_part == 'e':
             index = np.argmax(output)
             acc += (index == y_trueval[k])
         out += ('Accuracy of train is ' + str(acc/m)) + '\n'
+        train_accuracies.append(acc/m)
         indices = []
         acc=0.0
         for k in range(len(x_test)):
@@ -816,7 +820,20 @@ elif q_part == 'e':
             indices.append(index)
             acc += (index == y_test[k])
         out += ('Accuracy of test is ' + str(acc/len(x_test))) + '\n'
-     
+        test_accuracies.append(acc/len(x_test))
+
+    plt.figure()
+    plt.plot([2,3,4,5],train_accuracies)
+    plt.xlabel('Hidden layers')
+    plt.ylabel('Train accuracies')
+    plt.savefig(output_path + '/e_relu_train.png')
+    
+    plt.figure()
+    plt.plot([2,3,4,5],test_accuracies)
+    plt.xlabel('Hidden layers')
+    plt.ylabel('Test accuracies')
+    plt.savefig(output_path + '/e_relu_test.png')
+
     train_data = pd.read_csv(train_path)
     test_data = pd.read_csv(test_path)
 
@@ -941,12 +958,18 @@ elif q_part == 'e':
             acc += (index == y_test[k])
         out += ('Accuracy of test is ' + str(acc/len(x_test))) + '\n'
         test_accuracies.append(acc/len(x_test))
+
+    plt.figure()
     plt.plot([2,3,4,5],train_accuracies)
     plt.xlabel('Hidden layers')
     plt.ylabel('Train accuracies')
+    plt.savefig(output_path + '/e_sigmoid_train.png')
+    
+    plt.figure()
     plt.plot([2,3,4,5],test_accuracies)
     plt.xlabel('Hidden layers')
     plt.ylabel('Test accuracies')
+    plt.savefig(output_path + '/e_sigmoid_test.png')
 
     output_file = open(output_path + '/e.txt','w')
     output_file.write(out)
@@ -1115,6 +1138,3 @@ else:
     out += 'wrong qpart' + '\n'
     output_file = open(output_path + '/w.txt','w')
     output_file.write(out)
-
-
-output_file.close()

@@ -1,0 +1,32 @@
+imputer strategy is mean
+Training accuracy : 0.925512104283054
+Validation accuracy : 0.7851851851851852
+Test accuracy : 0.6979166666666666
+DecisionTreeClassifier(max_depth=7, min_samples_leaf=4, min_samples_split=4)
+Training accuracy : 0.839851024208566
+Validation accuracy : 0.8444444444444444
+Test accuracy : 0.7465277777777778
+DecisionTreeClassifier(ccp_alpha=0.015)
+Training accuracy : 0.7635009310986964
+Validation accuracy : 0.837037037037037
+Test accuracy : 0.75
+RandomForestClassifier(max_features=4, min_samples_split=7)
+Training accuracy : 0.8733705772811918
+Validation accuracy : 0.8666666666666667
+Test accuracy : 0.7743055555555556
+imputer strategy is median
+Training accuracy : 0.9180633147113594
+Validation accuracy : 0.7407407407407407
+Test accuracy : 0.7326388888888888
+DecisionTreeClassifier(max_depth=3, min_samples_leaf=9, min_samples_split=4)
+Training accuracy : 0.8007448789571695
+Validation accuracy : 0.8666666666666667
+Test accuracy : 0.7743055555555556
+DecisionTreeClassifier(ccp_alpha=0.015)
+Training accuracy : 0.8007448789571695
+Validation accuracy : 0.8666666666666667
+Test accuracy : 0.7743055555555556
+RandomForestClassifier(max_features=2, min_samples_split=7, n_estimators=120)
+Training accuracy : 0.8715083798882681
+Validation accuracy : 0.8444444444444444
+Test accuracy : 0.7847222222222222

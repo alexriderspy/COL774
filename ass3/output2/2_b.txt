@@ -1,0 +1,4 @@
+DecisionTreeClassifier(max_depth=40, min_samples_leaf=6)
+Training accuracy : 0.44
+Validation accuracy : 0.22633243092438365
+Test accuracy : 0.22570025666778262

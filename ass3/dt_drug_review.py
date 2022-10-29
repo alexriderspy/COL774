@@ -1,4 +1,8 @@
+import nltk
+nltk.download('stopwords')
+
 import sys
+from nltk.corpus import stopwords
 import pandas as pd
 import numpy as np
 from sklearn import tree
@@ -9,6 +13,7 @@ import lightgbm as lgb
 import xgboost as xgb
 from sklearn import ensemble
 import matplotlib.pyplot as plt
+
 
 
 train_path = sys.argv[1]
@@ -30,13 +35,13 @@ if q_part == 'a':
 
     train_data.drop('rating', inplace=True, axis=1)
 
-    vectorizer1 = CountVectorizer()
+    vectorizer1 = CountVectorizer(stop_words=stopwords.words())
     X_train_condition = vectorizer1.fit_transform(train_data.condition.astype('U'))
-    vectorizer2 = CountVectorizer()
+    vectorizer2 = CountVectorizer(stop_words=stopwords.words())
     X_train_review = vectorizer2.fit_transform(train_data.review)
-    vectorizer3 = CountVectorizer()
+    vectorizer3 = CountVectorizer(stop_words=stopwords.words())
     X_train_date = vectorizer3.fit_transform(train_data.date)
-    vectorizer4 = CountVectorizer()
+    vectorizer4 = CountVectorizer(stop_words=stopwords.words())
     X_train_usefulCount = vectorizer4.fit_transform(train_data.usefulCount.astype('U'))
 
     X_train = hstack([X_train_condition, X_train_review, X_train_date,X_train_usefulCount])
@@ -95,13 +100,13 @@ elif q_part == 'b':
 
     train_data.drop('rating', inplace=True, axis=1)
 
-    vectorizer1 = CountVectorizer()
+    vectorizer1 = CountVectorizer(stop_words=stopwords.words())
     X_train_condition = vectorizer1.fit_transform(train_data.condition.astype('U'))
-    vectorizer2 = CountVectorizer()
+    vectorizer2 = CountVectorizer(stop_words=stopwords.words())
     X_train_review = vectorizer2.fit_transform(train_data.review)
-    vectorizer3 = CountVectorizer()
+    vectorizer3 = CountVectorizer(stop_words=stopwords.words())
     X_train_date = vectorizer3.fit_transform(train_data.date)
-    vectorizer4 = CountVectorizer()
+    vectorizer4 = CountVectorizer(stop_words=stopwords.words())
     X_train_usefulCount = vectorizer4.fit_transform(train_data.usefulCount.astype('U'))
 
     X_train = hstack([X_train_condition, X_train_review, X_train_date,X_train_usefulCount])
@@ -167,17 +172,43 @@ elif q_part == 'c':
 
     train_data.drop('rating', inplace=True, axis=1)
 
-    vectorizer1 = CountVectorizer()
+    vectorizer1 = CountVectorizer(stop_words=stopwords.words())
     X_train_condition = vectorizer1.fit_transform(train_data.condition.astype('U'))
-    vectorizer2 = CountVectorizer()
+    vectorizer2 = CountVectorizer(stop_words=stopwords.words())
     X_train_review = vectorizer2.fit_transform(train_data.review)
-    vectorizer3 = CountVectorizer()
+    vectorizer3 = CountVectorizer(stop_words=stopwords.words())
     X_train_date = vectorizer3.fit_transform(train_data.date)
-    vectorizer4 = CountVectorizer()
+    vectorizer4 = CountVectorizer(stop_words=stopwords.words())
     X_train_usefulCount = vectorizer4.fit_transform(train_data.usefulCount.astype('U'))
 
     X_train = hstack([X_train_condition, X_train_review, X_train_date,X_train_usefulCount])
     # X_test = vectorizer.transform(X_test)
+
+    val_data = pd.read_csv(val_path)
+
+    y_val = val_data.rating
+
+    val_data.drop('rating', inplace=True, axis=1)
+
+    X_val_condition = vectorizer1.transform(val_data.condition.astype('U'))
+    X_val_review = vectorizer2.transform(val_data.review)
+    X_val_date = vectorizer3.transform(val_data.date)
+    X_val_usefulCount = vectorizer4.transform(val_data.usefulCount.astype('U'))
+
+    X_val = hstack([X_val_condition, X_val_review, X_val_date,X_val_usefulCount])
+
+    test_data = pd.read_csv(test_path)
+    y_test = test_data.rating
+
+    test_data.drop('rating', inplace=True, axis=1)
+
+    X_test_condition = vectorizer1.transform(test_data.condition.astype('U'))
+    X_test_review = vectorizer2.transform(test_data.review)
+    X_test_date = vectorizer3.transform(test_data.date)
+    X_test_usefulCount = vectorizer4.transform(test_data.usefulCount.astype('U'))
+
+    X_test = hstack([X_test_condition, X_test_review, X_test_date,X_test_usefulCount])
+
     parameters = {'max_depth':[40,100,200,500], 'min_samples_split':[1,2,3,4,5,6], 'min_samples_leaf':[1,2,3,4,5,6]}
 
     clf = tree.DecisionTreeClassifier(random_state = 0)
@@ -240,35 +271,9 @@ elif q_part == 'c':
     train_acc = np.sum(y_pred == y_train)/len(y_train)
     out += ("Training accuracy : " + str(train_acc)) + '\n'
 
-
-    val_data = pd.read_csv(val_path)
-
-    y_val = val_data.rating
-
-    val_data.drop('rating', inplace=True, axis=1)
-
-    X_val_condition = vectorizer1.transform(val_data.condition.astype('U'))
-    X_val_review = vectorizer2.transform(val_data.review)
-    X_val_date = vectorizer3.transform(val_data.date)
-    X_val_usefulCount = vectorizer4.transform(val_data.usefulCount.astype('U'))
-
-    X_val = hstack([X_val_condition, X_val_review, X_val_date,X_val_usefulCount])
-
     y_val_pred = clf.predict(X_val)
     val_acc = np.sum(y_val_pred == y_val)/len(y_val)
     out += ("Validation accuracy : " + str(val_acc)) + '\n'
-
-    test_data = pd.read_csv(test_path)
-    y_test = test_data.rating
-
-    test_data.drop('rating', inplace=True, axis=1)
-
-    X_test_condition = vectorizer1.transform(test_data.condition.astype('U'))
-    X_test_review = vectorizer2.transform(test_data.review)
-    X_test_date = vectorizer3.transform(test_data.date)
-    X_test_usefulCount = vectorizer4.transform(test_data.usefulCount.astype('U'))
-
-    X_test = hstack([X_test_condition, X_test_review, X_test_date,X_test_usefulCount])
 
     y_test_pred = clf.predict(X_test)
     test_acc = np.sum(y_test_pred == y_test)/len(y_test)
@@ -285,13 +290,13 @@ elif q_part == 'd':
 
     train_data.drop('rating', inplace=True, axis=1)
 
-    vectorizer1 = CountVectorizer()
+    vectorizer1 = CountVectorizer(stop_words=stopwords.words())
     X_train_condition = vectorizer1.fit_transform(train_data.condition.astype('U'))
-    vectorizer2 = CountVectorizer()
+    vectorizer2 = CountVectorizer(stop_words=stopwords.words())
     X_train_review = vectorizer2.fit_transform(train_data.review)
-    vectorizer3 = CountVectorizer()
+    vectorizer3 = CountVectorizer(stop_words=stopwords.words())
     X_train_date = vectorizer3.fit_transform(train_data.date)
-    vectorizer4 = CountVectorizer()
+    vectorizer4 = CountVectorizer(stop_words=stopwords.words())
     X_train_usefulCount = vectorizer4.fit_transform(train_data.usefulCount.astype('U'))
 
     X_train = hstack([X_train_condition, X_train_review, X_train_date,X_train_usefulCount])
@@ -358,13 +363,13 @@ elif q_part == 'e':
 
     train_data.drop('rating', inplace=True, axis=1)
 
-    vectorizer1 = CountVectorizer()
+    vectorizer1 = CountVectorizer(stop_words=stopwords.words())
     X_train_condition = vectorizer1.fit_transform(train_data.condition.astype('U'))
-    vectorizer2 = CountVectorizer()
+    vectorizer2 = CountVectorizer(stop_words=stopwords.words())
     X_train_review = vectorizer2.fit_transform(train_data.review)
-    vectorizer3 = CountVectorizer()
+    vectorizer3 = CountVectorizer(stop_words=stopwords.words())
     X_train_date = vectorizer3.fit_transform(train_data.date)
-    vectorizer4 = CountVectorizer()
+    vectorizer4 = CountVectorizer(stop_words=stopwords.words())
     X_train_usefulCount = vectorizer4.fit_transform(train_data.usefulCount.astype('U'))
 
     X_train = hstack([X_train_condition, X_train_review, X_train_date,X_train_usefulCount])
@@ -518,13 +523,13 @@ elif q_part == 'g':
 
         train_data.drop('rating', inplace=True, axis=1)
 
-        vectorizer1 = CountVectorizer()
+        vectorizer1 = CountVectorizer(stop_words=stopwords.words())
         X_train_condition = vectorizer1.fit_transform(train_data.condition.astype('U'))
-        vectorizer2 = CountVectorizer()
+        vectorizer2 = CountVectorizer(stop_words=stopwords.words())
         X_train_review = vectorizer2.fit_transform(train_data.review)
-        vectorizer3 = CountVectorizer()
+        vectorizer3 = CountVectorizer(stop_words=stopwords.words())
         X_train_date = vectorizer3.fit_transform(train_data.date)
-        vectorizer4 = CountVectorizer()
+        vectorizer4 = CountVectorizer(stop_words=stopwords.words())
         X_train_usefulCount = vectorizer4.fit_transform(train_data.usefulCount.astype('U'))
 
         out += ("Gridsearch") + '\n'
@@ -569,13 +574,6 @@ elif q_part == 'g':
         path = clf.cost_complexity_pruning_path(X_train,y_train)
         ccp_alphas, impurities = path.ccp_alphas, path.impurities
 
-        fig, ax = plt.subplots()
-        ax.plot(ccp_alphas[:-1], impurities[:-1], marker="o", drawstyle="steps-post")
-        ax.set_xlabel("effective alpha")
-        ax.set_ylabel("total impurity of leaves")
-        ax.set_title("Total Impurity vs effective alpha for training set")
-        fig.savefig(output_path + '/Total Impurity vs effective alpha for training set.png')
-
         clfs = []
         for ccp_alpha in ccp_alphas:
             clf = tree.DecisionTreeClassifier(random_state=0, ccp_alpha=ccp_alpha)
@@ -587,31 +585,11 @@ elif q_part == 'g':
 
         node_counts = [clf.tree_.node_count for clf in clfs]
         depth = [clf.tree_.max_depth for clf in clfs]
-        fig, ax = plt.subplots(2, 1)
-        ax[0].plot(ccp_alphas, node_counts, marker="o", drawstyle="steps-post")
-        ax[0].set_xlabel("alpha")
-        ax[0].set_ylabel("number of nodes")
-        ax[0].set_title("Number of nodes vs alpha")
-        ax[1].plot(ccp_alphas, depth, marker="o", drawstyle="steps-post")
-        ax[1].set_xlabel("alpha")
-        ax[1].set_ylabel("depth of tree")
-        ax[1].set_title("Depth vs alpha")
-        fig.tight_layout()
-        fig.savefig(output_path + '/Depth vs alpha.png')
 
         train_scores = [clf.score(X_train, y_train) for clf in clfs]
         val_scores = [clf.score(X_val, y_val) for clf in clfs]
         test_scores = [clf.score(X_test, y_test) for clf in clfs]
 
-        fig, ax = plt.subplots()
-        ax.set_xlabel("alpha")
-        ax.set_ylabel("accuracy")
-        ax.set_title("Accuracy vs alpha for training, validation and test sets")
-        ax.plot(ccp_alphas, train_scores, marker="o", label="train", drawstyle="steps-post")
-        ax.plot(ccp_alphas, val_scores, marker="o", label="validation", drawstyle="steps-post")
-        ax.plot(ccp_alphas, test_scores, marker="o", label="test", drawstyle="steps-post")
-        ax.legend()
-        fig.savefig(output_path + '/accuracy vs alpha.png')
 
 
         #best tree is one with highest validation accuracy 
@@ -780,4 +758,4 @@ elif q_part == 'g':
     output_file = open(output_path + '/2_g.txt','w')
     output_file.write(out)
 
-output_file.close()
+

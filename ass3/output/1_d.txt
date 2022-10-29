@@ -1,0 +1,6 @@
+RandomForestClassifier(max_features=3, min_samples_split=5, n_estimators=110,
+                       oob_score=True)
+Training accuracy : 0.8879120879120879
+Out of bag accuracy : 0.7516483516483516
+Validation accuracy : 0.8760330578512396
+Test accuracy : 0.766798418972332

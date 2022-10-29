@@ -1,0 +1,4 @@
+DecisionTreeClassifier(ccp_alpha=0.015)
+Training accuracy : 0.810989010989011
+Validation accuracy : 0.8925619834710744
+Test accuracy : 0.758893280632411
