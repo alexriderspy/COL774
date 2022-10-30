@@ -1,18 +1,18 @@
 import matplotlib.pyplot as plt
 
-output_path = 'out'
+output_path = '.'
 
-train_accuracies_grid = [0.95,0.96,0.96,0.96,0.97,0.97,0.97,0.98]
+train_accuracies_grid = [0.95,0.96,0.96,0.96,0.97,0.97,0.97,0.971]
 train_accuracies_ccp = [0.94,0.95,0.95,0.96,0.97,0.97,0.97,0.98]
-train_accuracies_rf = [0.97,0.97,0.97,0.97,0.97,0.97,0.97,0.98]
-train_accuracies_xgb = [0.96,0.96,0.97,0.97,0.97,0.97,0.98,0.98]
+train_accuracies_rf = [0.97,0.97,0.97,0.97,0.97,0.97,0.97,0.97]
+train_accuracies_xgb = [0.96,0.96,0.97,0.97,0.97,0.97,0.967,0.98]
 train_accuracies_lgb = [0.96,0.96,0.96,0.96,0.97,0.97,0.98,0.98]
 
-test_accuracies_grid = [0.45,0.46,0.46,0.50,0.52,0.56,0.59,0.60]
-test_accuracies_ccp = [0.47,0.47,0.48,0.50,0.53,0.57,0.60,0.62]
-test_accuracies_rf = [0.44,0.48,0.49,0.50,0.52,0.56,0.60,0.62]
-test_accuracies_xgb = [0.45,0.47,0.48,0.50,0.52,0.57,0.59,0.60]
-test_accuracies_lgb = [0.55,0.56,0.57,0.59,0.61,0.63,0.66,0.67]
+test_accuracies_grid = [0.4,0.46,0.46,0.50,0.52,0.56,0.55,0.555]
+test_accuracies_ccp = [0.38,0.47,0.48,0.50,0.53,0.57,0.55,0.567]
+test_accuracies_rf = [0.4,0.48,0.49,0.50,0.52,0.56,0.55,0.556]
+test_accuracies_xgb = [0.42,0.47,0.48,0.50,0.52,0.57,0.56,0.567]
+test_accuracies_lgb = [0.49,0.56,0.57,0.59,0.61,0.635,0.61,0.63]
 
 plt.figure()
 plt.plot([20000,40000,60000,80000,100000,120000,140000,160000],train_accuracies_grid)

@@ -1,3 +1,4 @@
+import time
 import nltk
 nltk.download('stopwords')
 
@@ -501,19 +502,19 @@ elif q_part == 'g':
 
     
     for num_samples in [20000,40000,60000,80000,100000,120000,140000,160000]:
-        train_accuracies_grid = []
+        train_times_grid = []
         test_accuracies_grid = []
 
-        train_accuracies_ccp = []
+        train_times_ccp = []
         test_accuracies_ccp = []
 
-        train_accuracies_rf = []
+        train_times_rf = []
         test_accuracies_rf = []
 
-        train_accuracies_xgb = []
+        train_times_xgb = []
         test_accuracies_xgb = []
 
-        train_accuracies_lgb = []
+        train_times_lgb = []
         test_accuracies_lgb = []
 
         out += ("Number of samples: " + str(num_samples)) + '\n'
@@ -543,13 +544,12 @@ elif q_part == 'g':
         clf = clf.fit(X_train,y_train)
         clf=clf.best_estimator_
 
-        out += str(clf) + '\n'
+        start = time.time()
 
         clf.fit(X_train,y_train)
+        end = time.time()
 
-        y_pred = clf.predict(X_train)
-        train_acc = np.sum(y_pred == y_train)/len(y_train)
-        train_accuracies_grid.append(train_acc)
+        train_times_grid.append(end-start)
 
         test_data = pd.read_csv(test_path)
         y_test = test_data.rating
@@ -596,12 +596,12 @@ elif q_part == 'g':
         #ccp_alpha = 0.02
 
         clf = tree.DecisionTreeClassifier(ccp_alpha = 0.02)
-        out += str(clf) + '\n'
-        clf.fit(X_train,y_train)
+        start = time.time()
 
-        y_pred = clf.predict(X_train)
-        train_acc = np.sum(y_pred == y_train)/len(y_train)
-        train_accuracies_ccp.append(train_acc)
+        clf.fit(X_train,y_train)
+        end = time.time()
+
+        train_times_ccp.append(end-start)
 
         test_data = pd.read_csv(test_path)
         y_test = test_data.rating
@@ -628,13 +628,12 @@ elif q_part == 'g':
         clf = clf.fit(X_train,y_train)
         clf=clf.best_estimator_
 
-        out += str(clf)  + '\n'
+        start = time.time()
 
         clf.fit(X_train,y_train)
+        end = time.time()
 
-        y_pred = clf.predict(X_train)
-        train_acc = np.sum(y_pred == y_train)/len(y_train)
-        train_accuracies_rf.append(train_acc)
+        train_times_rf.append(end-start)
 
         test_data = pd.read_csv(test_path)
         y_test = test_data.rating
@@ -660,16 +659,16 @@ elif q_part == 'g':
         y_train -= 1
         
         clf = GridSearchCV(estimator=dt, param_grid=parameters)
+        
         clf = clf.fit(X_train,y_train)
         clf=clf.best_estimator_
-
-        out += str(clf)  + '\n'
+        
+        start = time.time()
 
         clf.fit(X_train,y_train)
+        end = time.time()
 
-        y_pred = clf.predict(X_train)
-        train_acc = np.sum(y_pred == y_train)/len(y_train)
-        train_accuracies_xgb.append(train_acc)
+        train_times_xgb.append(end-start)
 
 
         test_data = pd.read_csv(test_path)
@@ -692,12 +691,17 @@ elif q_part == 'g':
 
         parameters = {'max_depth':[40,100,200,500], 'min_samples_split':[1,2,3,4,5,6], 'min_samples_leaf':[1,2,3,4,5,6]}
 
-        clf = lgb.LGBMClassifier()
-        clf.fit(X_train,y_train)
 
-        y_pred = clf.predict(X_train)
-        train_acc = np.sum(y_pred == y_train)/len(y_train)
-        train_accuracies_lgb.append(train_acc)
+        dt = lgb.LGBMClassifier()
+        clf = GridSearchCV(dt, param_grid = parameters)
+        clf.fit(X_train,y_train)
+        clf = clf.best_estimator_
+        start = time.time()
+
+        clf.fit(X_train,y_train)
+        end = time.time()
+
+        train_times_lgb.append(end-start)
 
         test_data = pd.read_csv(test_path)
         y_test = test_data.rating
@@ -716,23 +720,23 @@ elif q_part == 'g':
         test_accuracies_lgb.append(test_acc)
 
     plt.figure()
-    plt.plot([20000,40000,60000,80000,100000,120000,140000,160000],train_accuracies_grid)
+    plt.plot([20000,40000,60000,80000,100000,120000,140000,160000],train_times_grid)
     plt.savefig(output_path + '/grid_train.png')
     
     plt.figure()
-    plt.plot([20000,40000,60000,80000,100000,120000,140000,160000],train_accuracies_ccp)
+    plt.plot([20000,40000,60000,80000,100000,120000,140000,160000],train_times_ccp)
     plt.savefig(output_path + '/ccp_train.png')
     
     plt.figure()
-    plt.plot([20000,40000,60000,80000,100000,120000,140000,160000],train_accuracies_rf)
+    plt.plot([20000,40000,60000,80000,100000,120000,140000,160000],train_times_rf)
     plt.savefig(output_path + '/rf_train.png')
     
     plt.figure()
-    plt.plot([20000,40000,60000,80000,100000,120000,140000,160000],train_accuracies_xgb)
+    plt.plot([20000,40000,60000,80000,100000,120000,140000,160000],train_times_xgb)
     plt.savefig(output_path + '/xgb_train.png')
 
     plt.figure()
-    plt.plot([20000,40000,60000,80000,100000,120000,140000,160000],train_accuracies_lgb)
+    plt.plot([20000,40000,60000,80000,100000,120000,140000,160000],train_times_lgb)
     plt.savefig(output_path + '/lgb_train.png')
     
     plt.figure()
