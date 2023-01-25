@@ -1,0 +1,9 @@
+1) pca
+2) vc dim
+3) cnn
+4) svm
+5) gmm, em, kmeans
+6) gda
+7) logistic/linear
+8) nn
+9) dtrees
